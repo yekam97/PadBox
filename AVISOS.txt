@@ -1,0 +1,26 @@
+PadBox: avisos legales
+======================
+
+Copyright (c) 2026 yekam97 (GonStudio). Licencia MIT, ver LICENSE.txt.
+
+SONIDOS
+Los 13 sonidos del preset «Drum Pad EDM» se generan por síntesis (osciladores, ruido y filtros) con el
+programa GenSonidos, sin usar grabaciones ni muestras de terceros. Se pueden usar libremente.
+PadBox no incluye canciones ni melodías de terceros. Los ritmos y presets son patrones propios.
+El sonido de las notas lo produce el sintetizador que ya trae Windows, o el que elijas; no viene con PadBox.
+
+TUS PROPIOS SONIDOS
+Los archivos que cargas en los pads se quedan en tu PC. Asegúrate de tener derecho a usar esos sonidos,
+sobre todo si vas a publicar o vender lo que hagas con ellos.
+
+MARCAS
+PadBox no está afiliado a M-VAVE, Akai, Novation, OBS, Adobe, Microsoft ni a ninguna otra marca que se
+mencione en la app, ni cuenta con su respaldo. Sus nombres se usan solo para indicar con qué productos es
+compatible y pertenecen a sus dueños.
+
+CONTROL DE LUCES
+Los colores del SMC-PAD Pocket usan un protocolo no oficial, documentado por el proyecto DiscoFloor
+(https://github.com/krisvandecruys/DiscoFloor, licencia MIT, Copyright (c) 2026 Kris Vandecruys).
+PadBox cambia los colores solo en la memoria temporal del aparato y los restaura al salir.
+Los colores del Launchpad usan el protocolo que Novation publica en su Programmer's Reference.
+Puedes desactivar esta función con la casilla «Colores en el pad».

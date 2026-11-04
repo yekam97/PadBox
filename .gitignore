@@ -1,0 +1,15 @@
+# Compilados y paquetes (se generan con build.bat)
+dist/
+*.exe
+
+# Datos de cada usuario: no se publican
+padbox-config.json
+smc-pad-config.json
+*.log
+Sonidos/
+
+# Video promocional generado (python video/render.py + video/mux.ps1)
+video/out/
+
+# Herramientas descargadas (Microsoft.Windows.SDK.BuildTools) y paquete MSIX
+tools/

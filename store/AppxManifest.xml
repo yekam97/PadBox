@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Manifiesto del paquete MSIX de PadBox para la Microsoft Store.
+     Los valores {{...}} los completa store\build-msix.ps1 con store\identity.json
+     (Name y Publisher tienen que ser EXACTAMENTE los que muestra Partner Center → Identidad del producto). -->
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+         xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+         xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+         xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+         IgnorableNamespaces="uap desktop rescap">
+
+  <Identity Name="{{NAME}}" Publisher="{{PUBLISHER}}" Version="{{VERSION}}" ProcessorArchitecture="neutral" />
+
+  <Properties>
+    <DisplayName>PadBox</DisplayName>
+    <PublisherDisplayName>{{PUBLISHER_DISPLAY_NAME}}</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="es" />
+  </Resources>
+
+  <Applications>
+    <Application Id="PadBox" Executable="PadBox.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements DisplayName="PadBox"
+                          Description="Convierte tu controlador MIDI de pads en un instrumento y en un panel de atajos para Windows."
+                          BackgroundColor="transparent"
+                          Square150x150Logo="Assets\Square150x150Logo.png"
+                          Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
+      </uap:VisualElements>
+      <Extensions>
+        <!-- "Iniciar con Windows": PadBox la activa o desactiva desde su casilla -->
+        <desktop:Extension Category="windows.startupTask" Executable="PadBox.exe" EntryPoint="Windows.FullTrustApplication">
+          <desktop:StartupTask TaskId="PadBoxStartup" Enabled="false" DisplayName="PadBox" />
+        </desktop:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <!-- App de escritorio completa: necesita leer el controlador MIDI y enviar atajos de teclado -->
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

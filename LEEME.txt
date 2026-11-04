@@ -1,0 +1,25 @@
+PadBox 1.0.0
+============
+
+1. Conecta tu controlador MIDI por USB.
+2. Abre PadBox.exe. No necesita instalación.
+3. Si tu modelo no se reconoce solo, elígelo abajo en «Controlador» y pulsa «Detectar pads».
+   Toca los pads en el orden en que los quieres ver en pantalla.
+
+Pad 1: cambia entre MÚSICA y OFICINA
+Pad 2: preset anterior
+Pad 3: preset siguiente
+
+- Haz clic en un pad en la pantalla para cambiar lo que hace.
+- Arrastra archivos mp3 o wav sobre un pad para asignarle un sonido.
+- Al cerrar la ventana, PadBox sigue funcionando junto al reloj.
+  Para salir: clic derecho en el icono → Salir.
+
+Si Windows muestra «Windows protegió tu PC», pulsa «Más información» → «Ejecutar de todas formas».
+PadBox todavía no tiene firma digital.
+
+Tu configuración se guarda en padbox-config.json, en esta misma carpeta.
+
+PadBox no está afiliado a ninguna de las marcas que menciona. Más detalles en AVISOS.txt.
+
+Código, ayuda y novedades: https://github.com/yekam97/padbox
