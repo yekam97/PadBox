@@ -3,6 +3,7 @@
 # los sonidos originales del preset "Drum Pad EDM". mux.ps1 junta ambos en un MP4 H.264 con audio.
 #   python render.py              -> out\video.mp4 + out\musica.wav
 #   python render.py --stills 2,9 -> out\still_2.0.png, out\still_9.0.png (para revisar)
+#   python render.py --lang en    -> versión en inglés en out\en (usa las capturas de docs\en)
 import math
 import os
 import sys
@@ -15,7 +16,52 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
-OUT = os.path.join(HERE, "out")
+LANG = sys.argv[sys.argv.index("--lang") + 1] if "--lang" in sys.argv else "es"
+OUT = os.path.join(HERE, "out", "en") if LANG == "en" else os.path.join(HERE, "out")
+SHOTS = os.path.join(REPO, "docs", "en") if LANG == "en" else os.path.join(REPO, "docs")
+
+# Textos del video en inglés (cada texto que se dibuja se busca aquí tal cual)
+EN = {
+    "Tu controlador de pads, a otro nivel.": "Your pad controller, taken to the next level.",
+    "Cualquier": "Works with",
+    "controlador MIDI": "MIDI controllers",
+    "de 8 o 16 pads": "with 8 or 16 pads",
+    "y más": "and more",
+    "El pad 1 cambia de modo": "Pad 1 switches modes",
+    "y los pads 2 y 3 cambian de preset": "and pads 2 and 3 switch presets",
+    "MÚSICA": "MUSIC",
+    "OFICINA": "OFFICE",
+    "MÚSICA  ·  1 de 13": "MUSIC  ·  1 of 13",
+    "OFICINA  ·  1 de 6": "OFFICE  ·  1 of 6",
+    "Batería rock": "Rock drums",
+    "Escritorio": "Desktop",
+    "Balada": "Ballad",
+    "Reggaetón": "Reggaeton",
+    "13 presets": "13 unique",
+    "únicos": "presets",
+    "Cada uno con su ritmo,": "Each with its own beat,",
+    "instrumento y tonalidad": "instrument and key",
+    "Bucles": "Synced",
+    "sincronizados": "loops",
+    "Prende capas y entran a tiempo": "Layers come in right on the beat",
+    "Atajos con": "One-touch",
+    "un toque": "shortcuts",
+    "Windows · Navegador · OBS": "Windows · Browser · OBS",
+    "Tus pads,": "Your pads,",
+    "a todo color": "in full color",
+    "El color cambia con cada preset": "Colors change with each preset",
+    "M-VAVE SMC-PAD Pocket: probado": "M-VAVE SMC-PAD Pocket: tested",
+    "Perfiles sin probar: Akai · Novation": "Untested profiles: Akai · Novation",
+    "Otros: con «Detectar pads»": "Others: with “Detect pads”",
+    "Gratis  ·  Windows 10 y 11  ·  Código abierto": "Free  ·  Windows 10 and 11  ·  Open source",
+    "Consíguelo en Microsoft Store": "Get it on the Microsoft Store",
+}
+
+
+def tr(s):
+    return EN.get(s, s) if LANG == "en" else s
+
+
 W, H, FPS = 1920, 1080, 30
 BPM = 126
 BEAT = 60 / BPM
@@ -126,6 +172,7 @@ def glow(color, size):
 
 @lru_cache(1024)
 def text(s, size, weight="regular", color=TEXT):
+    s = tr(s)
     f = font(weight, size)
     asc, desc = f.getmetrics()
     w = int(f.getlength(s)) + 8
@@ -169,7 +216,7 @@ def pill(label, color, size=26, pad_x=22, weight="bold", text_color=(255, 255, 2
 
 # ---------- recursos ----------
 def load_shot(name):
-    for p in (os.path.join(REPO, "docs", name),):
+    for p in (os.path.join(SHOTS, name),):
         if os.path.exists(p):
             return Image.open(p).convert("RGBA")
     raise FileNotFoundError(name)
@@ -491,7 +538,7 @@ def scene_outro(f, lt, t):
     paste_c(f, text("Gratis  ·  Windows 10 y 11  ·  Código abierto", 40, "regular", MUTED), W / 2, 540 + (1 - a2) * 30, a2)
     a3 = ease_back(prog(lt, 0.9, 0.6))
     if a3 > 0.02:
-        btn = pill("Descárgalo en  yekam97.github.io/padbox", MUSIC, 40, 44)
+        btn = pill("Consíguelo en Microsoft Store", MUSIC, 40, 44)
         sc = (0.6 + 0.4 * a3) * (1 + 0.03 * p)
         btn = btn.resize((int(btn.size[0] * sc), int(btn.size[1] * sc)), Image.LANCZOS)
         paste_c(f, glow(MUSIC, 900), W / 2, 680, 0.4 * clamp(a3))

@@ -29,7 +29,7 @@ $manifest = (Get-Content (Join-Path $PSScriptRoot 'AppxManifest.xml') -Raw).
 
 # 2. Índice de recursos (para que Windows elija el tamaño de ícono correcto en cada pantalla)
 $cfg = Join-Path $repo 'dist\priconfig.xml'
-& (Join-Path $bin 'makepri.exe') createconfig /cf $cfg /dq es /pv 10.0.0 /o | Out-Null
+& (Join-Path $bin 'makepri.exe') createconfig /cf $cfg /dq es_en-us /pv 10.0.0 /o | Out-Null
 # Un solo índice dentro del paquete (sin separar los íconos de 200 % en otro archivo)
 $x = [xml](Get-Content $cfg -Raw)
 $x.SelectNodes('//packaging') | ForEach-Object { $_.ParentNode.RemoveChild($_) | Out-Null }

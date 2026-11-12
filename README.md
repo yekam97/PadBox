@@ -9,11 +9,17 @@ PadBox tiene dos modos que cambias con el pad 1:
 
 Los pads 2 y 3 pasan al preset anterior y al siguiente. Al cambiar, aparece un aviso pequeño con el ícono y el nombre del preset.
 
-![PadBox en modo Música](docs/captura-musica.png)
+La app está en **español e inglés**: se abre en el idioma de Windows y puedes cambiarlo abajo, en «Idioma».
+
+![PadBox en modo Música](docs/captura-primera-vez.png)
 
 ## Descargar
 
-1. Descarga **PadBox-1.0.0.zip** desde la página de descarga o desde *Releases*.
+**Microsoft Store (recomendado):** [PadBox en la Microsoft Store](https://apps.microsoft.com/detail/9N7H11FB7SL7). Se instala y se actualiza solo.
+
+**Versión portable:**
+
+1. Descarga **PadBox-1.1.0.zip** desde la [página de descarga](https://yekam97.github.io/padbox/).
 2. Descomprímelo en una carpeta (por ejemplo, en Documentos).
 3. Conecta tu controlador por USB y abre **PadBox.exe**.
 
@@ -73,4 +79,8 @@ PadBox no está afiliado a M-VAVE, Akai, Novation, OBS, Adobe ni Microsoft. Sus 
 
 ### English (short)
 
-**PadBox** turns any MIDI pad controller into an instrument and a Windows shortcut panel. It includes music presets with looped rhythms, custom sounds (mp3/wav), synced drum-pad loops, and office presets for Windows, browsers, OBS, Photoshop, Illustrator and Word/Excel. Pad 1 switches modes, and pads 2 and 3 switch presets. It is tested on the M-VAVE SMC-PAD Pocket (with RGB pad colors); profiles for Akai, other M-VAVE models and Novation Launchpad are untested, and any controller works with "Detect pads". It is portable, needs no install, and runs on Windows 10/11. Build it with `build.bat`. Licensed under MIT.
+**PadBox** turns a MIDI pad controller into an instrument and a Windows shortcut panel. It includes music presets with looped beats, custom sounds (mp3/wav), synced drum-pad loops, and office presets for Windows, browsers, OBS, Photoshop, Illustrator and Word/Excel. Pad 1 switches modes, and pads 2 and 3 switch presets. The app is in English and Spanish: it follows your Windows language, and you can change it under "Language". It is tested on the M-VAVE SMC-PAD Pocket (with RGB pad colors); profiles for Akai, other M-VAVE models and Novation Launchpad are untested, and other controllers can be set up with "Detect pads".
+
+Get it on the [Microsoft Store](https://apps.microsoft.com/detail/9N7H11FB7SL7), or download the portable version from the [download page](https://yekam97.github.io/padbox/). Runs on Windows 10/11. Build it with `build.bat`. Licensed under MIT.
+
+![PadBox in English](docs/en/captura-primera-vez.png)

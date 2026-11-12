@@ -17,6 +17,358 @@ using Timer = System.Windows.Forms.Timer;
 
 namespace PadBox
 {
+    // ---------- idioma ----------
+    // La app está escrita en español; en inglés se traduce cada texto con esta tabla.
+    // El idioma sale de «Idioma» en la configuración, o del idioma de Windows (español si es español, si no inglés).
+    static class L
+    {
+        public static bool En;
+
+        public static void Init(string[] args, string cfgPath)
+        {
+            string pick = null;
+            int i = Array.IndexOf(args, "--lang");   // pruebas: --lang en | es
+            if (i >= 0 && i + 1 < args.Length) pick = args[i + 1];
+            if (pick == null)
+                try
+                {
+                    if (File.Exists(cfgPath))
+                    {
+                        var m = System.Text.RegularExpressions.Regex.Match(File.ReadAllText(cfgPath), "\"Lang\":\"(es|en)\"");
+                        if (m.Success) pick = m.Groups[1].Value;
+                    }
+                }
+                catch (Exception) { }
+            if (pick == "es" || pick == "en") En = pick == "en";
+            else
+                try { En = !string.Equals(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName, "es", StringComparison.OrdinalIgnoreCase); }
+                catch (Exception) { En = false; }
+        }
+
+        public static string T(string es)
+        {
+            string en;
+            return En && es != null && Map.TryGetValue(es, out en) ? en : es;
+        }
+
+        static readonly Dictionary<string, string> Map = new Dictionary<string, string> {
+            {"Otro controlador (16 pads)", "Other controller (16 pads)"},
+            {"Otro controlador (8 pads)", "Other controller (8 pads)"},
+            {"Batería", "Drums"},
+            {"Canción", "Song"},
+            {"Teclado", "Keyboard"},
+            {"Nota", "Note"},
+            {"Notas", "Notes"},
+            {"Controles", "Controls"},
+            {"Escritorio", "Desktop"},
+            {"Navegador", "Browser"},
+            {"Grabar / OBS", "Record / OBS"},
+            {"Transmitir", "Stream"},
+            {"Pluma", "Pen"},
+            {"Pincel", "Brush"},
+            {"Documento", "Document"},
+            {"Paleta", "Palette"},
+            {"Foto", "Photo"},
+            {"Cámara", "Camera"},
+            {"Micrófono", "Microphone"},
+            {"Audífonos", "Headphones"},
+            {"Reproducir", "Play"},
+            {"Juegos", "Games"},
+            {"Rayo", "Lightning"},
+            {"Código", "Code"},
+            {"Correo", "Mail"},
+            {"Carpeta", "Folder"},
+            {"Calculadora", "Calculator"},
+            {"Ajustes", "Settings"},
+            {"Estrella", "Star"},
+            {"Batería rock", "Rock drums"},
+            {"Cumbia (percusión)", "Cumbia (percussion)"},
+            {"Guitarra blues", "Blues guitar"},
+            {"Piano de acordes", "Chord piano"},
+            {"Mis sonidos", "My sounds"},
+            {"Batería GM", "GM drums"},
+            {"Piano cumbia villera", "Cumbia villera piano"},
+            {"Acordeón", "Accordion"},
+            {"Teclado cumbia rebajada", "Slowed cumbia keys"},
+            {"Saxofón", "Saxophone"},
+            {"Rack de batería", "Drum rack"},
+            {"Cromática C3", "Chromatic C3"},
+            {"Escala Do mayor", "C major scale"},
+            {"Pentatónica La menor", "A minor pentatonic"},
+            {"Acordes en Do", "Chords in C"},
+            {"Botones CC (on/off)", "CC buttons (on/off)"},
+            {"Mayor", "Major"},
+            {"Menor", "Minor"},
+            {"Disminuido", "Diminished"},
+            {"Ritmo rock", "Rock beat"},
+            {"Bombo", "Kick"},
+            {"Redoblante", "Snare"},
+            {"Aro", "Rimshot"},
+            {"Hat cerrado", "Closed hat"},
+            {"Hat pedal", "Pedal hat"},
+            {"Hat abierto", "Open hat"},
+            {"Tom piso", "Floor tom"},
+            {"Tom bajo", "Low tom"},
+            {"Tom medio", "Mid tom"},
+            {"Tom alto", "High tom"},
+            {"Ritmo house", "House beat"},
+            {"Ritmo techno", "Techno beat"},
+            {"Botón ", "Button "},
+            {"Ritmo reggaetón", "Reggaeton beat"},
+            {"Percusión", "Percussion"},
+            {"Bajo", "Bass"},
+            {"Bajo wub", "Wub bass"},
+            {"Acordes", "Chords"},
+            {"Melodía", "Melody"},
+            {"Arpegio", "Arpeggio"},
+            {"Voz", "Vocal"},
+            {"Subida", "Riser"},
+            {"Impacto", "Impact"},
+            {"Redoble", "Snare roll"},
+            {"Ritmo blues", "Blues beat"},
+            {"Ritmo balada", "Ballad beat"},
+            {"Ritmo dubstep", "Dubstep beat"},
+            {"Golpe", "Hit"},
+            {"Bajo ", "Bass "},
+            {"Ritmo cumbia", "Cumbia beat"},
+            {"Güiro largo", "Long güiro"},
+            {"Güiro corto", "Short güiro"},
+            {"Conga abierta", "Open conga"},
+            {"Conga muda", "Muted conga"},
+            {"Conga baja", "Low conga"},
+            {"Timbal alto", "High timbale"},
+            {"Timbal bajo", "Low timbale"},
+            {"Cencerro", "Cowbell"},
+            {"Bongó alto", "High bongo"},
+            {"Bongó bajo", "Low bongo"},
+            {"Ritmo cuarteto", "Cuarteto beat"},
+            {"Ritmo vallenato", "Vallenato beat"},
+            {"Ritmo rebajado", "Slowed beat"},
+            {"Ritmo bossa nova", "Bossa nova beat"},
+            {"Copiar", "Copy"},
+            {"Pegar", "Paste"},
+            {"Deshacer", "Undo"},
+            {"Rehacer", "Redo"},
+            {"Cambiar ventana", "Switch window"},
+            {"Ver escritorio", "Show desktop"},
+            {"Captura de pantalla", "Screenshot"},
+            {"Pista anterior", "Previous track"},
+            {"Play / Pausa", "Play / Pause"},
+            {"Pista siguiente", "Next track"},
+            {"Silenciar", "Mute"},
+            {"Bajar volumen", "Volume down"},
+            {"Subir volumen", "Volume up"},
+            {"Grabar on/off", "Record on/off"},
+            {"Transmitir on/off", "Stream on/off"},
+            {"Pausar grabación", "Pause recording"},
+            {"Guardar repetición", "Save replay"},
+            {"Escena 1", "Scene 1"},
+            {"Escena 2", "Scene 2"},
+            {"Escena 3", "Scene 3"},
+            {"Escena 4", "Scene 4"},
+            {"Silenciar micrófono", "Mute mic"},
+            {"Silenciar escritorio", "Mute desktop audio"},
+            {"Captura de OBS", "OBS screenshot"},
+            {"Cámara virtual", "Virtual camera"},
+            {"Mostrar/ocultar cámara", "Show/hide camera"},
+            {"Nueva pestaña", "New tab"},
+            {"Cerrar pestaña", "Close tab"},
+            {"Reabrir pestaña", "Reopen tab"},
+            {"Pestaña anterior", "Previous tab"},
+            {"Pestaña siguiente", "Next tab"},
+            {"Atrás", "Back"},
+            {"Adelante", "Forward"},
+            {"Recargar", "Reload"},
+            {"Barra de direcciones", "Address bar"},
+            {"Buscar en la página", "Find in page"},
+            {"Selección", "Selection"},
+            {"Selección directa", "Direct selection"},
+            {"Texto", "Type"},
+            {"Rectángulo", "Rectangle"},
+            {"Elipse", "Ellipse"},
+            {"Mano (mantener)", "Hand (hold)"},
+            {"Agrupar", "Group"},
+            {"Desagrupar", "Ungroup"},
+            {"Ajustar a ventana", "Fit to window"},
+            {"Mover", "Move"},
+            {"Marco", "Marquee"},
+            {"Lazo", "Lasso"},
+            {"Borrador", "Eraser"},
+            {"Tampón", "Clone stamp"},
+            {"Duplicar capa", "Duplicate layer"},
+            {"Transformar", "Transform"},
+            {"Intercambiar colores", "Swap colors"},
+            {"Atajo no válido", "Invalid shortcut"},
+            {"Espacio", "Space"},
+            {"Silencio", "Mute"},
+            {"Play/Pausa", "Play/Pause"},
+            {"Supr", "Del"},
+            {"Retroceso", "Backspace"},
+            {"Sonidos|*.mp3;*.wav;*.wma;*.m4a;*.aac;*.aif;*.aiff;*.mp2;*.snd;*.au|Todos los archivos|*.*", "Sounds|*.mp3;*.wav;*.wma;*.m4a;*.aac;*.aif;*.aiff;*.mp2;*.snd;*.au|All files|*.*"},
+            {"Cumbia villera", "Cumbia villera"},
+            {"Cuarteto", "Cuarteto"},
+            {"Cumbia rebajada", "Slowed cumbia"},
+            {"Balada", "Ballad"},
+            {"Reggaetón (dembow)", "Reggaeton (dembow)"},
+            {"Luces: ", "Lights: "},
+            {"Luces: el SMC-PAD no respondió.", "Lights: the SMC-PAD did not respond."},
+            {"Luces: el SMC-PAD no confirmó el cambio de color.", "Lights: the SMC-PAD did not confirm the color change."},
+            {"(vacío)", "(empty)"},
+            {"Atajo de teclado", "Keyboard shortcut"},
+            {"Escribir texto", "Type text"},
+            {"Abrir programa o web", "Open program or website"},
+            {"Sonido (mp3, wav…)", "Sound (mp3, wav…)"},
+            {"Nota MIDI", "MIDI note"},
+            {"Acorde MIDI", "MIDI chord"},
+            {"Melodía paso a paso", "Step-by-step melody"},
+            {"Ritmo en bucle (on/off)", "Looped beat (on/off)"},
+            {"CC momentáneo", "Momentary CC"},
+            {"Nada", "Nothing"},
+            {"Una vez (suena completo)", "Once (plays to the end)"},
+            {"Mientras mantienes el pad", "While you hold the pad"},
+            {"Bucle on/off", "Loop on/off"},
+            {"MÚSICA", "MUSIC"},
+            {"OFICINA", "OFFICE"},
+            {"Cambiar el ícono del preset", "Change the preset icon"},
+            {"Nuevo", "New"},
+            {"Duplicar", "Duplicate"},
+            {"Renombrar", "Rename"},
+            {"Borrar", "Delete"},
+            {"Nombre", "Name"},
+            {"Acción", "Action"},
+            {"Atajo", "Shortcut"},
+            {"Grabar", "Record"},
+            {"Pulsa «Grabar» y luego la combinación en tu teclado, o escríbela.\n\nEjemplos: Ctrl+Shift+N · Win+D · Alt+Tab · F5\nTeclas especiales: Space, Enter, Esc, Delete, Left, Right, Add (Num +), VolumeUp, VolumeMute, MediaPlayPause\n\nLa tecla queda presionada mientras sostienes el pad.", "Press “Record” and then the key combination, or type it.\n\nExamples: Ctrl+Shift+N · Win+D · Alt+Tab · F5\nSpecial keys: Space, Enter, Esc, Delete, Left, Right, Add (Num +), VolumeUp, VolumeMute, MediaPlayPause\n\nThe key stays pressed while you hold the pad."},
+            {"Texto, programa o página web", "Text, program or website"},
+            {"Examinar…", "Browse…"},
+            {"«Gemido» al empezar (pitch bend)", "“Bend-in” at the start (pitch bend)"},
+            {"Canal", "Channel"},
+            {"Velocidad (0 = según golpe)", "Velocity (0 = from hit)"},
+            {"Archivo de sonido", "Sound file"},
+            {"Elegir sonido…", "Choose sound…"},
+            {"Modo", "Mode"},
+            {"Volumen (0 = golpe)", "Volume (0 = from hit)"},
+            {"También puedes arrastrar archivos de audio desde el Explorador y soltarlos sobre un pad.", "You can also drag audio files from File Explorer and drop them on a pad."},
+            {"Color en el pad", "Pad color"},
+            {"Color del preset", "Preset color"},
+            {"Usar este color", "Use this color"},
+            {"▶  Probar", "▶  Test"},
+            {"Los cambios se guardan solos.\nPad 1: modo · Pad 2: preset anterior · Pad 3: preset siguiente.", "Changes are saved automatically.\nPad 1: mode · Pad 2: previous preset · Pad 3: next preset."},
+            {"Actualizar", "Refresh"},
+            {"Detectar pads", "Detect pads"},
+            {"Aviso en pantalla al cambiar", "On-screen notice when switching"},
+            {"Iniciar con Windows", "Start with Windows"},
+            {"Restaurar presets", "Restore presets"},
+            {"Colores en el pad", "Pad colors"},
+            {"Automático", "Automatic"},
+            {"Controlador:", "Controller:"},
+            {"Entrada:", "Input:"},
+            {"Salida música:", "Music output:"},
+            {"Abrir", "Open"},
+            {"Modo música", "Music mode"},
+            {"Modo oficina", "Office mode"},
+            {"Salir", "Exit"},
+            {"PadBox sigue activo", "PadBox is still running"},
+            {"Los pads siguen funcionando. Ábrelo desde el icono junto al reloj.", "Your pads keep working. Open it from the icon next to the clock."},
+            {"No se pudo guardar la configuración: ", "Could not save the settings: "},
+            {"Windows no dejó activar el inicio automático. Actívalo en Configuración → Aplicaciones → Inicio.", "Windows did not allow automatic startup. Turn it on in Settings → Apps → Startup."},
+            {"No se pudo cambiar el inicio automático: ", "Could not change automatic startup: "},
+            {"(ninguna)", "(none)"},
+            {"Conecta tu controlador MIDI por USB…", "Connect your MIDI controller via USB…"},
+            {"Controlador desconectado. Esperando a que vuelva…", "Controller disconnected. Waiting for it to come back…"},
+            {"Conectado a ", "Connected to "},
+            {"). Toca un pad.", "). Press a pad."},
+            {"No se pudo abrir «", "Could not open “"},
+            {"». ¿Lo está usando otro programa (DAW o navegador)? Ciérralo y pulsa Actualizar.", "”. Is another program (a DAW or browser) using it? Close it and press Refresh."},
+            {"No se pudo abrir la salida «", "Could not open the output “"},
+            {"».", "”."},
+            {"● Pad conectado", "● Pad connected"},
+            {"● Sin pad", "● No pad"},
+            {" · nota ", " · note "},
+            {") · fuerza ", ") · velocity "},
+            {"El pad mandó la nota ", "The pad sent note "},
+            {"), que no está asignada. Usa «Detectar pads».", "), which is not assigned. Use “Detect pads”."},
+            {"El atajo «", "The shortcut “"},
+            {"» no es válido.", "” is not valid."},
+            {"»: ", "”: "},
+            {"La melodía de «", "The melody of “"},
+            {"» tiene notas no válidas.", "” has invalid notes."},
+            {"Nota ", "Note "},
+            {" de ", " of "},
+            {"Elige una «Salida música» abajo para oír el ritmo.", "Choose a “Music output” below to hear the beat."},
+            {"Ritmo desconocido: ", "Unknown beat: "},
+            {": no tiene sonido. Arrastra un archivo de audio sobre él o elígelo en el editor.", ": no sound yet. Drag an audio file onto it or choose one in the editor."},
+            {"No encuentro el sonido «", "Can't find the sound “"},
+            {"Los pads 1, 2 y 3 son fijos (modo y presets). Suelta el sonido en los pads 4 a 16.", "Pads 1, 2 and 3 are fixed (mode and presets). Drop the sound on pads 4 to 16."},
+            {"No se pudo copiar «", "Could not copy “"},
+            {"Sonido asignado al pad ", "Sound assigned to pad "},
+            {" sonidos asignados desde el pad ", " sounds assigned starting at pad "},
+            {"Elige un sonido para el pad ", "Choose a sound for pad "},
+            {"Elige una «Salida música» abajo para oír los pads.", "Choose a “Music output” below to hear the pads."},
+            {"Aceptar", "OK"},
+            {"Cancelar", "Cancel"},
+            {"Duplicar preset", "Duplicate preset"},
+            {"Nuevo preset", "New preset"},
+            {" (copia)", " (copy)"},
+            {"Mi preset", "My preset"},
+            {"Renombrar preset", "Rename preset"},
+            {"Cada modo necesita al menos un preset.", "Each mode needs at least one preset."},
+            {"¿Borrar el preset «", "Delete the preset “"},
+            {"»?", "”?"},
+            {"¿Restaurar los presets originales de los dos modos? Se pierden los cambios que hiciste en los presets (la detección de pads se conserva).", "Restore the original presets of both modes? Your changes to the presets will be lost (pad detection is kept)."},
+            {"Detección cancelada.", "Detection canceled."},
+            {"Primero conecta tu controlador (mira la barra de abajo).", "Connect your controller first (see the bar at the bottom)."},
+            {"DETECTAR: toca el pad físico que quieres como Pad 1 (arriba a la izquierda en pantalla).", "DETECT: press the physical pad you want as Pad 1 (top left on screen)."},
+            {"¡Listo! Los ", "Done! All "},
+            {" pads quedaron detectados.", " pads have been detected."},
+            {"DETECTAR: ahora toca el pad físico para el Pad ", "DETECT: now press the physical pad for Pad "},
+            {"Cambiar modo", "Switch mode"},
+            {"Preset anterior", "Previous preset"},
+            {"Preset siguiente", "Next preset"},
+            {"→ Música", "→ Music"},
+            {"→ Oficina", "→ Office"},
+            {"Escribe: ", "Types: "},
+            {"Abre: ", "Opens: "},
+            {" · canal ", " · channel "},
+            {"Acorde ", "Chord "},
+            {"Notas no válidas", "Invalid notes"},
+            {"Melodía · ", "Melody · "},
+            {" notas · toca para avanzar", " notes · press to advance"},
+            {" on/off · canal ", " on/off · channel "},
+            {"Programa ", "Program "},
+            {"Sin sonido: arrastra un archivo aquí", "No sound: drag a file here"},
+            {"Mantener · ", "Hold · "},
+            {"Bucle · ", "Loop · "},
+            {"Este pad alterna entre el modo MÚSICA y el modo OFICINA.\n\nCada modo guarda sus propios presets y recuerda cuál usaste por última vez.", "This pad switches between MUSIC mode and OFFICE mode.\n\nEach mode keeps its own presets and remembers the one you used last."},
+            {"Este pad pasa al ", "This pad goes to the "},
+            {"preset anterior", "previous preset"},
+            {"preset siguiente", "next preset"},
+            {" del modo actual:\n\n", " of the current mode:\n\n"},
+            {"Notas en orden", "Notes in order"},
+            {"Puede ser un programa (.exe), un acceso directo, una carpeta o una página web (https://…).", "It can be a program (.exe), a shortcut, a folder or a website (https://…)."},
+            {"Cada toque suena la siguiente nota; si paras ", "Each press plays the next note; if you stop for "},
+            {"2,5", "2.5"},
+            {" s vuelve a empezar.\nNotas: Do Re Mi Fa Sol La Si (o C D E…), con # o b y octava. Ej: Sol#3 La3 Do4\nUsa | para separar frases. Canal ", " s it starts over.\nNotes: C D E F G A B (or Do Re Mi…), with # or b and an octave. E.g. G#3 A3 C4\nUse | to separate phrases. Channel "},
+            {"El texto se escribe en la ventana activa, como si lo teclearas.", "The text is typed into the active window, as if you typed it."},
+            {"Nota raíz", "Root note"},
+            {"Programa", "Program"},
+            {"Tempo (BPM)", "Tempo (BPM)"},
+            {"Número de CC", "CC number"},
+            {"Ritmo", "Beat"},
+            {"Acorde", "Chord"},
+            {"Valor (0 = 127)", "Value (0 = 127)"},
+            {"Programas y accesos directos|*.exe;*.lnk;*.bat;*.cmd|Todos los archivos|*.*", "Programs and shortcuts|*.exe;*.lnk;*.bat;*.cmd|All files|*.*"},
+            {"Elige el programa a abrir", "Choose the program to open"},
+            {"Los atajos y el texto se envían a la ventana activa: abre el programa y toca el pad.", "Shortcuts and text go to the active window: open the program and press the pad."},
+            {"Presiona…", "Press keys…"},
+            {"Ocurrió un error: ", "An error occurred: "},
+            {"PadBox ya está abierto. Búscalo junto al reloj de Windows.", "PadBox is already open. Look for it next to the Windows clock."},
+            {"Idioma:", "Language:"},
+            {"Español", "Español"},
+            {"El idioma cambiará la próxima vez que abras PadBox. Con «Restaurar presets» los presets quedan en ese idioma.", "The language will change the next time you open PadBox. Use “Restore presets” to get the presets in that language."}
+        };
+    }
+
     // ---------- modelo ----------
     public class PadAction
     {
@@ -60,6 +412,7 @@ namespace PadBox
         public bool NoPadLights { get; set; }       // true = no pintar los pads del aparato
         public Dictionary<string, string> PadOriginals { get; set; }   // colores originales de cada banco del pad (hex), para restaurar
         public string Device { get; set; }          // perfil de controlador elegido ("auto" = según el puerto)
+        public string Lang { get; set; }            // idioma: null = el de Windows, "es" o "en" (se aplica al abrir la app)
         public Dictionary<string, List<int>> PadNotes { get; set; }   // notas detectadas por perfil de controlador
     }
 
@@ -96,8 +449,8 @@ namespace PadBox
             new DeviceProfile { Id = "novation-lpx", Name = "Novation Launchpad X", Match = new[] { "LPX", "Launchpad X" }, Notes = LaunchpadBlock(), Lights = "launchpad", LaunchpadId = 0x0C },
             new DeviceProfile { Id = "novation-lpminimk3", Name = "Novation Launchpad Mini MK3", Match = new[] { "LPMiniMK3", "Launchpad Mini" }, Notes = LaunchpadBlock(), Lights = "launchpad", LaunchpadId = 0x0D },
             new DeviceProfile { Id = "novation-lppromk3", Name = "Novation Launchpad Pro MK3", Match = new[] { "LPProMK3", "Launchpad Pro" }, Notes = LaunchpadBlock(), Lights = "launchpad", LaunchpadId = 0x0E },
-            new DeviceProfile { Id = "generic16", Name = "Otro controlador (16 pads)", Notes = Mpc(16) },
-            new DeviceProfile { Id = "generic8", Name = "Otro controlador (8 pads)", Pads = 8, Notes = Mpc(8) },
+            new DeviceProfile { Id = "generic16", Name = L.T("Otro controlador (16 pads)"), Notes = Mpc(16) },
+            new DeviceProfile { Id = "generic8", Name = L.T("Otro controlador (8 pads)"), Pads = 8, Notes = Mpc(8) },
         };
         public static DeviceProfile Get(string id) { return All.FirstOrDefault(p => p.Id == id); }
         public static DeviceProfile Generic { get { return Get("generic16"); } }
@@ -171,24 +524,24 @@ namespace PadBox
         }
 
         public static readonly List<Def> All = new List<Def> {
-            new Def("drum", "Batería", 0, 0xFF5A4F), new Def("cumbia", "Cumbia", 0xE8D6, 0xFF9500), new Def("song", "Canción", 0xE90B, 0xFF4FA3),
-            new Def("rack", "Drum Rack", 0xE81E, 0xA36BFF), new Def("keys", "Teclado", 0xE765, 0x5B8CFF), new Def("note", "Nota", 0xEC4F, 0x34C759),
-            new Def("notes", "Notas", 0xE189, 0x9B5CFF), new Def("sliders", "Controles", 0xE9E9, 0x1FB8CD), new Def("desktop", "Escritorio", 0xE7F4, 0x0A84FF),
-            new Def("browser", "Navegador", 0xE774, 0x00B894), new Def("obs", "Grabar / OBS", 0xE7C8, 0xE5484D), new Def("stream", "Transmitir", 0xE93E, 0x8E44FF),
-            new Def("pen", "Pluma", 0xE76D, 0xFF9A00), new Def("brush", "Pincel", 0xE771, 0x31A8FF), new Def("doc", "Documento", 0xE8A5, 0x4F6BED),
-            new Def("palette", "Paleta", 0xE790, 0xFF6B9A), new Def("photo", "Foto", 0xE91B, 0x2FB5A0), new Def("camera", "Cámara", 0xE722, 0x6C7A89),
-            new Def("video", "Video", 0xE714, 0xFF7043), new Def("mic", "Micrófono", 0xE720, 0xE84393), new Def("headphones", "Audífonos", 0xE7F6, 0x00A8FF),
-            new Def("play", "Reproducir", 0xE768, 0x2ECC71), new Def("game", "Juegos", 0xE7FC, 0x7C5CFF), new Def("bolt", "Rayo", 0xE945, 0xF5B000),
-            new Def("code", "Código", 0xE943, 0x26A69A), new Def("mail", "Correo", 0xE715, 0x1E88E5), new Def("folder", "Carpeta", 0xE8B7, 0xE6A100),
-            new Def("calc", "Calculadora", 0xE8EF, 0x78909C), new Def("gear", "Ajustes", 0xE713, 0x8D99AE), new Def("star", "Estrella", 0xE734, 0xFFB300),
+            new Def("drum", L.T("Batería"), 0, 0xFF5A4F), new Def("cumbia", "Cumbia", 0xE8D6, 0xFF9500), new Def("song", L.T("Canción"), 0xE90B, 0xFF4FA3),
+            new Def("rack", "Drum Rack", 0xE81E, 0xA36BFF), new Def("keys", L.T("Teclado"), 0xE765, 0x5B8CFF), new Def("note", L.T("Nota"), 0xEC4F, 0x34C759),
+            new Def("notes", L.T("Notas"), 0xE189, 0x9B5CFF), new Def("sliders", L.T("Controles"), 0xE9E9, 0x1FB8CD), new Def("desktop", L.T("Escritorio"), 0xE7F4, 0x0A84FF),
+            new Def("browser", L.T("Navegador"), 0xE774, 0x00B894), new Def("obs", L.T("Grabar / OBS"), 0xE7C8, 0xE5484D), new Def("stream", L.T("Transmitir"), 0xE93E, 0x8E44FF),
+            new Def("pen", L.T("Pluma"), 0xE76D, 0xFF9A00), new Def("brush", L.T("Pincel"), 0xE771, 0x31A8FF), new Def("doc", L.T("Documento"), 0xE8A5, 0x4F6BED),
+            new Def("palette", L.T("Paleta"), 0xE790, 0xFF6B9A), new Def("photo", L.T("Foto"), 0xE91B, 0x2FB5A0), new Def("camera", L.T("Cámara"), 0xE722, 0x6C7A89),
+            new Def("video", "Video", 0xE714, 0xFF7043), new Def("mic", L.T("Micrófono"), 0xE720, 0xE84393), new Def("headphones", L.T("Audífonos"), 0xE7F6, 0x00A8FF),
+            new Def("play", L.T("Reproducir"), 0xE768, 0x2ECC71), new Def("game", L.T("Juegos"), 0xE7FC, 0x7C5CFF), new Def("bolt", L.T("Rayo"), 0xE945, 0xF5B000),
+            new Def("code", L.T("Código"), 0xE943, 0x26A69A), new Def("mail", L.T("Correo"), 0xE715, 0x1E88E5), new Def("folder", L.T("Carpeta"), 0xE8B7, 0xE6A100),
+            new Def("calc", L.T("Calculadora"), 0xE8EF, 0x78909C), new Def("gear", L.T("Ajustes"), 0xE713, 0x8D99AE), new Def("star", L.T("Estrella"), 0xE734, 0xFFB300),
         };
 
         static readonly Dictionary<string, string> ByPreset = new Dictionary<string, string> {
-            {"Batería rock", "drum"}, {"Cumbia (percusión)", "cumbia"}, {"Guitarra blues", "mic"}, {"Piano de acordes", "photo"}, {"Mis sonidos", "folder"}, {"Drum Pad EDM", "stream"},
-            {"Batería GM", "drum"}, {"Cumbia", "cumbia"}, {"Piano cumbia villera", "keys"}, {"Acordeón", "notes"}, {"Teclado cumbia rebajada", "headphones"}, {"Saxofón", "play"}, {"Dubstep", "bolt"}, {"Rack de batería", "rack"},
-            {"Cromática C3", "keys"}, {"Escala Do mayor", "note"}, {"Pentatónica La menor", "note"}, {"Acordes en Do", "notes"},
-            {"Botones CC (on/off)", "sliders"}, {"Escritorio", "desktop"}, {"Navegador", "browser"}, {"OBS", "obs"},
-            {"Illustrator", "pen"}, {"Photoshop", "brush"}, {"Word/Excel (español)", "doc"} };
+            {L.T("Batería rock"), "drum"}, {L.T("Cumbia (percusión)"), "cumbia"}, {L.T("Guitarra blues"), "mic"}, {L.T("Piano de acordes"), "photo"}, {L.T("Mis sonidos"), "folder"}, {"Drum Pad EDM", "stream"},
+            {L.T("Batería GM"), "drum"}, {"Cumbia", "cumbia"}, {L.T("Piano cumbia villera"), "keys"}, {L.T("Acordeón"), "notes"}, {L.T("Teclado cumbia rebajada"), "headphones"}, {L.T("Saxofón"), "play"}, {"Dubstep", "bolt"}, {L.T("Rack de batería"), "rack"},
+            {L.T("Cromática C3"), "keys"}, {L.T("Escala Do mayor"), "note"}, {L.T("Pentatónica La menor"), "note"}, {L.T("Acordes en Do"), "notes"},
+            {L.T("Botones CC (on/off)"), "sliders"}, {L.T("Escritorio"), "desktop"}, {L.T("Navegador"), "browser"}, {"OBS", "obs"},
+            {"Illustrator", "pen"}, {"Photoshop", "brush"}, {"Word/Excel (español)", "doc"}, {"Word/Excel", "doc"} };
 
         public static Def Get(string key) { return All.FirstOrDefault(d => d.Key == key) ?? All.First(d => d.Key == "star"); }
         public static string Default(string presetName) { string k; return presetName != null && ByPreset.TryGetValue(presetName, out k) ? k : "star"; }
@@ -263,19 +616,19 @@ namespace PadBox
         public static readonly string[] Names = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
         public static string NoteName(int n) { return Names[((n % 12) + 12) % 12] + (n / 12 - 2); } // C3 = 60
         static readonly string[] Solfa = { "Do", "Do#", "Re", "Re#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si" };
-        public static string SolfaName(int n) { return Solfa[((n % 12) + 12) % 12] + (n / 12 - 2); }   // misma octava que ParseSeq
+        public static string SolfaName(int n) { return L.En ? NoteName(n) : Solfa[((n % 12) + 12) % 12] + (n / 12 - 2); }   // misma octava que ParseSeq; en inglés, C D E…
 
         static readonly Dictionary<string, int[]> Chords = new Dictionary<string, int[]> {
             {"maj", new[] {0, 4, 7}}, {"min", new[] {0, 3, 7}}, {"dim", new[] {0, 3, 6}},
             {"maj7", new[] {0, 4, 7, 11}}, {"m7", new[] {0, 3, 7, 10}}, {"dom7", new[] {0, 4, 7, 10}},
             {"sus2", new[] {0, 2, 7}}, {"sus4", new[] {0, 5, 7}} };
         static readonly Dictionary<string, string> Display = new Dictionary<string, string> {
-            {"maj", "Mayor"}, {"min", "Menor"}, {"dim", "Disminuido"}, {"maj7", "Maj7"}, {"m7", "m7"}, {"dom7", "7"}, {"sus2", "Sus2"}, {"sus4", "Sus4"} };
+            {"maj", L.T("Mayor")}, {"min", L.T("Menor")}, {"dim", L.T("Disminuido")}, {"maj7", "Maj7"}, {"m7", "m7"}, {"dom7", "7"}, {"sus2", "Sus2"}, {"sus4", "Sus4"} };
         static readonly Dictionary<string, string> Suffix = new Dictionary<string, string> {
             {"maj", ""}, {"min", "m"}, {"dim", "°"}, {"maj7", "maj7"}, {"m7", "m7"}, {"dom7", "7"}, {"sus2", "sus2"}, {"sus4", "sus4"} };
         public static readonly string[] ChordIds = { "maj", "min", "dim", "maj7", "m7", "dom7", "sus2", "sus4" };
 
-        public static string ChordName(string q) { string s; return q != null && Display.TryGetValue(q, out s) ? s : "Mayor"; }
+        public static string ChordName(string q) { string s; return q != null && Display.TryGetValue(q, out s) ? s : L.T("Mayor"); }
         public static string ChordLabel(int root, string q) { string s; Suffix.TryGetValue(q ?? "maj", out s); return Names[((root % 12) + 12) % 12] + (s ?? ""); }
         public static int[] Intervals(string q) { int[] iv; return q != null && Chords.TryGetValue(q, out iv) ? iv : Chords["maj"]; }
 
@@ -333,10 +686,10 @@ namespace PadBox
         {
             int n = PadLayout.Actions - 1;   // el pad 4 es el ritmo
             return new List<Preset> {
-                Kit(17, WithLoop(Loop("Ritmo rock", "rock", 100), P("Batería rock", new[] {
-                    Note("Bombo", 36, 10), Note("Redoblante", 38, 10), Note("Aro", 37, 10), Note("Hat cerrado", 42, 10),
-                    Note("Hat pedal", 44, 10), Note("Hat abierto", 46, 10), Note("Crash", 49, 10), Note("Ride", 51, 10),
-                    Note("Tom piso", 41, 10), Note("Tom bajo", 45, 10), Note("Tom medio", 47, 10), Note("Tom alto", 50, 10) }))),
+                Kit(17, WithLoop(Loop(L.T("Ritmo rock"), "rock", 100), P(L.T("Batería rock"), new[] {
+                    Note(L.T("Bombo"), 36, 10), Note(L.T("Redoblante"), 38, 10), Note(L.T("Aro"), 37, 10), Note(L.T("Hat cerrado"), 42, 10),
+                    Note(L.T("Hat pedal"), 44, 10), Note(L.T("Hat abierto"), 46, 10), Note("Crash", 49, 10), Note("Ride", 51, 10),
+                    Note(L.T("Tom piso"), 41, 10), Note(L.T("Tom bajo"), 45, 10), Note(L.T("Tom medio"), 47, 10), Note(L.T("Tom alto"), 50, 10) }))),
                 Kit(1, Cumbia()),
                 Kit(1, PianoVillera()),
                 Kit(1, Acordeon()),
@@ -347,8 +700,8 @@ namespace PadBox
                 Kit(1, PianoAcordes()),
                 Kit(1, MisSonidos()),
                 DrumPadEdm(),
-                Kit(26, WithLoop(Loop("Ritmo house", "house", 124), P("Rack de batería", Enumerable.Range(0, n).Select(i => Note("Slot " + (i + 1), 36 + i, 1))))),
-                Kit(26, WithLoop(Loop("Ritmo techno", "techno", 130), P("Botones CC (on/off)", Enumerable.Range(0, n).Select(i => new PadAction { Name = "Botón " + (i + 1), Type = "toggle", Num = 20 + i })))),
+                Kit(26, WithLoop(Loop(L.T("Ritmo house"), "house", 124), P(L.T("Rack de batería"), Enumerable.Range(0, n).Select(i => Note("Slot " + (i + 1), 36 + i, 1))))),
+                Kit(26, WithLoop(Loop(L.T("Ritmo techno"), "techno", 130), P(L.T("Botones CC (on/off)"), Enumerable.Range(0, n).Select(i => new PadAction { Name = L.T("Botón ") + (i + 1), Type = "toggle", Num = 20 + i })))),
             };
         }
         static Preset Kit(int kit, Preset p) { p.DrumKit = kit; return p; }
@@ -356,9 +709,9 @@ namespace PadBox
         // Sampler: pads de sonido (mp3, wav…) que el usuario llena arrastrando sus archivos. Empieza vacío: la app no copia sonidos de terceros.
         public static Preset MisSonidos()
         {
-            var pads = new List<PadAction> { Loop("Ritmo reggaetón", "dembow", 95) };
+            var pads = new List<PadAction> { Loop(L.T("Ritmo reggaetón"), "dembow", 95) };
             while (pads.Count < PadLayout.Actions) pads.Add(new PadAction { Name = "", Type = "sound", Value = "" });
-            return P("Mis sonidos", pads);
+            return P(L.T("Mis sonidos"), pads);
         }
 
         // Bucles y efectos EDM ORIGINALES (creados por GenSonidos.exe en Sonidos\EDM, 126 BPM, Sol menor).
@@ -368,12 +721,12 @@ namespace PadBox
             Func<string, string, int, string, PadAction> S = (name, file, mode, color) =>
                 new PadAction { Name = name, Type = "sound", Value = "Sonidos\\EDM\\" + file, Num = mode, Color = color };
             var p = P("Drum Pad EDM", new[] {
-                S("Batería", "01 Bateria.wav", 2, Red), S("Hats", "02 Hats.wav", 2, Red), S("Percusión", "03 Percusion.wav", 2, Red),
-                S("Bajo", "04 Bajo.wav", 2, Orange), S("Bajo wub", "05 Bajo wub.wav", 2, Orange),
-                S("Acordes", "06 Acordes.wav", 2, Blue), S("Pad", "07 Pad.wav", 2, Blue),
-                S("Melodía", "08 Melodia.wav", 2, Green), S("Arpegio", "09 Arpegio.wav", 2, Green),
-                S("Voz", "10 Voz.wav", 2, Purple),
-                S("Subida", "11 Subida.wav", 0, Pink), S("Impacto", "12 Impacto.wav", 0, Pink), S("Redoble", "13 Redoble.wav", 0, Pink) });
+                S(L.T("Batería"), "01 Bateria.wav", 2, Red), S("Hats", "02 Hats.wav", 2, Red), S(L.T("Percusión"), "03 Percusion.wav", 2, Red),
+                S(L.T("Bajo"), "04 Bajo.wav", 2, Orange), S(L.T("Bajo wub"), "05 Bajo wub.wav", 2, Orange),
+                S(L.T("Acordes"), "06 Acordes.wav", 2, Blue), S("Pad", "07 Pad.wav", 2, Blue),
+                S(L.T("Melodía"), "08 Melodia.wav", 2, Green), S(L.T("Arpegio"), "09 Arpegio.wav", 2, Green),
+                S(L.T("Voz"), "10 Voz.wav", 2, Purple),
+                S(L.T("Subida"), "11 Subida.wav", 0, Pink), S(L.T("Impacto"), "12 Impacto.wav", 0, Pink), S(L.T("Redoble"), "13 Redoble.wav", 0, Pink) });
             p.SyncBpm = 126; p.SyncBars = 2;
             return p;
         }
@@ -381,9 +734,9 @@ namespace PadBox
         // Guitarra eléctrica con distorsión: escala de blues de Do y ritmo shuffle
         public static Preset GuitarraBlues()
         {
-            var pads = new List<PadAction> { Loop("Ritmo blues", "blues", 90) };
+            var pads = new List<PadAction> { Loop(L.T("Ritmo blues"), "blues", 90) };
             pads.AddRange(new[] { 60, 63, 65, 66, 67, 70, 72, 75, 77, 78, 79, 82 }.Select(n => Note(Mus.SolfaName(n), n, 2)));   // Do Mib Fa Fa# Sol Sib …
-            var p = P("Guitarra blues", pads);
+            var p = P(L.T("Guitarra blues"), pads);
             p.Program2 = 30; // guitarra con distorsión
             return Tonic(p, 0);
         }
@@ -391,11 +744,11 @@ namespace PadBox
         // Piano de cola con acordes en Do mayor y ritmo de balada
         public static Preset PianoAcordes()
         {
-            var pads = new List<PadAction> { Loop("Ritmo balada", "balada", 72) };
+            var pads = new List<PadAction> { Loop(L.T("Ritmo balada"), "balada", 72) };
             pads.AddRange(new[] {
                 Chord(60, "maj"), Chord(62, "min"), Chord(64, "min"), Chord(65, "maj"), Chord(67, "maj"), Chord(69, "min"),
                 Chord(71, "dim"), Chord(60, "maj7"), Chord(62, "m7"), Chord(64, "m7"), Chord(65, "maj7"), Chord(67, "dom7") });
-            var p = P("Piano de acordes", pads);
+            var p = P(L.T("Piano de acordes"), pads);
             p.Program = 1;   // piano de cola
             return Tint(p);
         }
@@ -405,9 +758,9 @@ namespace PadBox
         public static Preset Dubstep()
         {
             var pads = new List<PadAction> {
-                Loop("Ritmo dubstep", "dubstep", 140),
-                Note("Drop!", 57, 10), Note("Golpe", 40, 10), Note("Bombo", 35, 10) };   // crash 2, redoblante eléctrico, bombo grave
-            pads.AddRange(new[] { 41, 44, 48, 51 }.Select(n => Note("Bajo " + Mus.SolfaName(n), n, 1)));    // Fa1 Lab1 Do2 Mib2
+                Loop(L.T("Ritmo dubstep"), "dubstep", 140),
+                Note("Drop!", 57, 10), Note(L.T("Golpe"), 40, 10), Note(L.T("Bombo"), 35, 10) };   // crash 2, redoblante eléctrico, bombo grave
+            pads.AddRange(new[] { 41, 44, 48, 51 }.Select(n => Note(L.T("Bajo ") + Mus.SolfaName(n), n, 1)));    // Fa1 Lab1 Do2 Mib2
             pads.AddRange(new[] { 65, 68, 72, 75, 77 }.Select(n => Note("Lead " + Mus.SolfaName(n), n, 2)));   // Fa3 … Fa4
             var p = P("Dubstep", pads);
             p.Program = 39;   // synth bass 1
@@ -434,22 +787,22 @@ namespace PadBox
         // Cumbia clásica: solo percusión latina (sin notas ni acordes, así no se repite con los presets melódicos)
         static Preset Cumbia()
         {
-            return P("Cumbia (percusión)", new[] {
-                Loop("Ritmo cumbia", "cumbia", 92),
-                Note("Güiro largo", 74, 10), Note("Güiro corto", 73, 10), Note("Conga abierta", 63, 10), Note("Conga muda", 62, 10),
-                Note("Conga baja", 64, 10), Note("Timbal alto", 65, 10), Note("Timbal bajo", 66, 10), Note("Cencerro", 56, 10),
-                Note("Maracas", 70, 10), Note("Claves", 75, 10), Note("Bongó alto", 60, 10), Note("Bongó bajo", 61, 10) });
+            return P(L.T("Cumbia (percusión)"), new[] {
+                Loop(L.T("Ritmo cumbia"), "cumbia", 92),
+                Note(L.T("Güiro largo"), 74, 10), Note(L.T("Güiro corto"), 73, 10), Note(L.T("Conga abierta"), 63, 10), Note(L.T("Conga muda"), 62, 10),
+                Note(L.T("Conga baja"), 64, 10), Note(L.T("Timbal alto"), 65, 10), Note(L.T("Timbal bajo"), 66, 10), Note(L.T("Cencerro"), 56, 10),
+                Note("Maracas", 70, 10), Note("Claves", 75, 10), Note(L.T("Bongó alto"), 60, 10), Note(L.T("Bongó bajo"), 61, 10) });
         }
 
         public static Preset Escritorio()
         {
-            return P("Escritorio", Flat(
-                C(Cyan, K("Copiar", "Ctrl+C"), K("Pegar", "Ctrl+V")),
-                C(Orange, K("Deshacer", "Ctrl+Z"), K("Rehacer", "Ctrl+Y")),
-                C(Purple, K("Cambiar ventana", "Alt+Tab"), K("Ver escritorio", "Win+D")),
-                C(Pink, K("Captura de pantalla", "Win+Shift+S")),
-                C(Green, K("Pista anterior", "MediaPreviousTrack"), K("Play / Pausa", "MediaPlayPause"), K("Pista siguiente", "MediaNextTrack")),
-                C(Blue, K("Silenciar", "VolumeMute"), K("Bajar volumen", "VolumeDown"), K("Subir volumen", "VolumeUp"))));
+            return P(L.T("Escritorio"), Flat(
+                C(Cyan, K(L.T("Copiar"), "Ctrl+C"), K(L.T("Pegar"), "Ctrl+V")),
+                C(Orange, K(L.T("Deshacer"), "Ctrl+Z"), K(L.T("Rehacer"), "Ctrl+Y")),
+                C(Purple, K(L.T("Cambiar ventana"), "Alt+Tab"), K(L.T("Ver escritorio"), "Win+D")),
+                C(Pink, K(L.T("Captura de pantalla"), "Win+Shift+S")),
+                C(Green, K(L.T("Pista anterior"), "MediaPreviousTrack"), K(L.T("Play / Pausa"), "MediaPlayPause"), K(L.T("Pista siguiente"), "MediaNextTrack")),
+                C(Blue, K(L.T("Silenciar"), "VolumeMute"), K(L.T("Bajar volumen"), "VolumeDown"), K(L.T("Subir volumen"), "VolumeUp"))));
         }
 
         // OBS no trae atajos por defecto: se usan F13-F24 (no existen en el teclado, así no chocan con nada)
@@ -457,20 +810,20 @@ namespace PadBox
         public static Preset Obs()
         {
             return P("OBS", Flat(
-                C(Red, K("Grabar on/off", "F13"), K("Transmitir on/off", "F14"), K("Pausar grabación", "F15"), K("Guardar repetición", "F16")),
-                C(Blue, K("Escena 1", "F17"), K("Escena 2", "F18"), K("Escena 3", "F19"), K("Escena 4", "F20")),
-                C(Orange, K("Silenciar micrófono", "F21"), K("Silenciar escritorio", "F22")),
-                C(Pink, K("Captura de OBS", "F23")),
-                C(Purple, K("Cámara virtual", "F24"), K("Mostrar/ocultar cámara", "Ctrl+F13"))));
+                C(Red, K(L.T("Grabar on/off"), "F13"), K(L.T("Transmitir on/off"), "F14"), K(L.T("Pausar grabación"), "F15"), K(L.T("Guardar repetición"), "F16")),
+                C(Blue, K(L.T("Escena 1"), "F17"), K(L.T("Escena 2"), "F18"), K(L.T("Escena 3"), "F19"), K(L.T("Escena 4"), "F20")),
+                C(Orange, K(L.T("Silenciar micrófono"), "F21"), K(L.T("Silenciar escritorio"), "F22")),
+                C(Pink, K(L.T("Captura de OBS"), "F23")),
+                C(Purple, K(L.T("Cámara virtual"), "F24"), K(L.T("Mostrar/ocultar cámara"), "Ctrl+F13"))));
         }
 
         // Piano eléctrico villero: Re menor armónica (con Do#) y ritmo de cuarteto
         public static Preset PianoVillera()
         {
             var notes = new[] { 62, 64, 65, 67, 69, 70, 73, 74, 76, 77, 79, 81 }; // Re3 Mi3 Fa3 Sol3 La3 Sib3 Do#4 Re4 … La4
-            var pads = new List<PadAction> { Loop("Ritmo cuarteto", "cuarteto", 112) };
+            var pads = new List<PadAction> { Loop(L.T("Ritmo cuarteto"), "cuarteto", 112) };
             pads.AddRange(notes.Select(n => Note(Mus.SolfaName(n), n, 2)));
-            var p = P("Piano cumbia villera", pads);
+            var p = P(L.T("Piano cumbia villera"), pads);
             p.Program2 = 5; // piano eléctrico
             return Tonic(p, 2);
         }
@@ -486,10 +839,10 @@ namespace PadBox
         // Acordeón vallenato: Sol mayor, melodía (canal 2) y acordes G C D Em (canal 1)
         public static Preset Acordeon()
         {
-            var pads = new List<PadAction> { Loop("Ritmo vallenato", "vallenato", 115) };
+            var pads = new List<PadAction> { Loop(L.T("Ritmo vallenato"), "vallenato", 115) };
             pads.AddRange(new[] { 67, 69, 71, 72, 74, 76, 78, 79 }.Select(n => Note(Mus.SolfaName(n), n, 2)));   // Sol3 … Sol4
             pads.AddRange(new[] { Chord(55, "maj"), Chord(48, "maj"), Chord(50, "maj"), Chord(52, "min") });   // G C D Em
-            var p = P("Acordeón", pads);
+            var p = P(L.T("Acordeón"), pads);
             p.Program = 22; p.Program2 = 22;
             return Tonic(Tint(p), 7);
         }
@@ -498,9 +851,9 @@ namespace PadBox
         public static Preset Rebajada()
         {
             var notes = new[] { 52, 54, 55, 57, 59, 60, 63, 64, 66, 67, 69, 71 };   // Mi2 Fa#2 Sol2 La2 Si2 Do3 Re#3 Mi3 …
-            var pads = new List<PadAction> { Loop("Ritmo rebajado", "rebajada", 70) };
+            var pads = new List<PadAction> { Loop(L.T("Ritmo rebajado"), "rebajada", 70) };
             pads.AddRange(notes.Select(n => Note(Mus.SolfaName(n), n, 2)));
-            var p = P("Teclado cumbia rebajada", pads);
+            var p = P(L.T("Teclado cumbia rebajada"), pads);
             p.Program2 = 17; // órgano
             return Tonic(Tint(p), 4);
         }
@@ -508,9 +861,9 @@ namespace PadBox
         // Saxofón alto: Fa mayor y ritmo de bossa nova
         public static Preset Saxofon()
         {
-            var pads = new List<PadAction> { Loop("Ritmo bossa nova", "bossa", 120) };
+            var pads = new List<PadAction> { Loop(L.T("Ritmo bossa nova"), "bossa", 120) };
             pads.AddRange(new[] { 65, 67, 69, 70, 72, 74, 76, 77, 79, 81, 82, 84 }.Select(n => Note(Mus.SolfaName(n), n, 2)));   // Fa3 … Do5
-            var p = P("Saxofón", pads);
+            var p = P(L.T("Saxofón"), pads);
             p.Program2 = 66; // saxo alto
             return Tonic(Tint(p), 5);
         }
@@ -524,33 +877,41 @@ namespace PadBox
         {
             return new List<Preset> {
                 Escritorio(),
-                P("Navegador", Flat(
-                    C(Cyan, K("Nueva pestaña", "Ctrl+T"), K("Cerrar pestaña", "Ctrl+W"), K("Reabrir pestaña", "Ctrl+Shift+T")),
-                    C(Purple, K("Pestaña anterior", "Ctrl+Shift+Tab"), K("Pestaña siguiente", "Ctrl+Tab")),
-                    C(Green, K("Atrás", "Alt+Left"), K("Adelante", "Alt+Right"), K("Recargar", "F5")),
-                    C(Orange, K("Barra de direcciones", "Ctrl+L"), K("Buscar en la página", "Ctrl+F")),
+                P(L.T("Navegador"), Flat(
+                    C(Cyan, K(L.T("Nueva pestaña"), "Ctrl+T"), K(L.T("Cerrar pestaña"), "Ctrl+W"), K(L.T("Reabrir pestaña"), "Ctrl+Shift+T")),
+                    C(Purple, K(L.T("Pestaña anterior"), "Ctrl+Shift+Tab"), K(L.T("Pestaña siguiente"), "Ctrl+Tab")),
+                    C(Green, K(L.T("Atrás"), "Alt+Left"), K(L.T("Adelante"), "Alt+Right"), K(L.T("Recargar"), "F5")),
+                    C(Orange, K(L.T("Barra de direcciones"), "Ctrl+L"), K(L.T("Buscar en la página"), "Ctrl+F")),
                     C(Blue, K("Zoom +", "Ctrl+Add"), K("Zoom −", "Ctrl+Subtract")),
                     C(Red, Run("Google", "https://www.google.com")))),
                 Obs(),
                 P("Illustrator", Flat(
-                    C(Cyan, K("Selección", "V"), K("Selección directa", "A"), K("Pluma", "P"), K("Texto", "T"), K("Rectángulo", "M"), K("Elipse", "L"), K("Pincel", "B")),
-                    C(Purple, K("Mano (mantener)", "Space")),
-                    C(Orange, K("Deshacer", "Ctrl+Z"), K("Rehacer", "Ctrl+Shift+Z")),
-                    C(Green, K("Agrupar", "Ctrl+G"), K("Desagrupar", "Ctrl+Shift+G")),
-                    C(Blue, K("Ajustar a ventana", "Ctrl+0")))),
+                    C(Cyan, K(L.T("Selección"), "V"), K(L.T("Selección directa"), "A"), K(L.T("Pluma"), "P"), K(L.T("Texto"), "T"), K(L.T("Rectángulo"), "M"), K(L.T("Elipse"), "L"), K(L.T("Pincel"), "B")),
+                    C(Purple, K(L.T("Mano (mantener)"), "Space")),
+                    C(Orange, K(L.T("Deshacer"), "Ctrl+Z"), K(L.T("Rehacer"), "Ctrl+Shift+Z")),
+                    C(Green, K(L.T("Agrupar"), "Ctrl+G"), K(L.T("Desagrupar"), "Ctrl+Shift+G")),
+                    C(Blue, K(L.T("Ajustar a ventana"), "Ctrl+0")))),
                 P("Photoshop", Flat(
-                    C(Cyan, K("Mover", "V"), K("Marco", "M"), K("Lazo", "L"), K("Pincel", "B"), K("Borrador", "E"), K("Tampón", "S"), K("Texto", "T")),
-                    C(Purple, K("Mano (mantener)", "Space")),
-                    C(Orange, K("Deshacer", "Ctrl+Z"), K("Rehacer", "Ctrl+Shift+Z")),
-                    C(Green, K("Duplicar capa", "Ctrl+J"), K("Transformar", "Ctrl+T")),
-                    C(Pink, K("Intercambiar colores", "X")))),
+                    C(Cyan, K(L.T("Mover"), "V"), K(L.T("Marco"), "M"), K(L.T("Lazo"), "L"), K(L.T("Pincel"), "B"), K(L.T("Borrador"), "E"), K(L.T("Tampón"), "S"), K(L.T("Texto"), "T")),
+                    C(Purple, K(L.T("Mano (mantener)"), "Space")),
+                    C(Orange, K(L.T("Deshacer"), "Ctrl+Z"), K(L.T("Rehacer"), "Ctrl+Shift+Z")),
+                    C(Green, K(L.T("Duplicar capa"), "Ctrl+J"), K(L.T("Transformar"), "Ctrl+T")),
+                    C(Pink, K(L.T("Intercambiar colores"), "X")))),
+                // Word y Excel usan atajos distintos según el idioma de Office (en español: Ctrl+G guardar, Ctrl+N negrita…)
+                L.En ? P("Word/Excel", Flat(
+                    C(Red, K("Save", "Ctrl+S")),
+                    C(Cyan, K("Copy", "Ctrl+C"), K("Paste", "Ctrl+V")),
+                    C(Orange, K("Undo", "Ctrl+Z"), K("Redo", "Ctrl+Y")),
+                    C(Purple, K("Bold", "Ctrl+B"), K("Italic", "Ctrl+I"), K("Underline", "Ctrl+U")),
+                    C(Green, K("Find", "Ctrl+F"), K("Replace", "Ctrl+H")),
+                    C(Blue, K("Print", "Ctrl+P"), K("New", "Ctrl+N"), K("Select all", "Ctrl+A")))) :
                 P("Word/Excel (español)", Flat(
                     C(Red, K("Guardar", "Ctrl+G")),
-                    C(Cyan, K("Copiar", "Ctrl+C"), K("Pegar", "Ctrl+V")),
-                    C(Orange, K("Deshacer", "Ctrl+Z"), K("Rehacer", "Ctrl+Y")),
+                    C(Cyan, K(L.T("Copiar"), "Ctrl+C"), K(L.T("Pegar"), "Ctrl+V")),
+                    C(Orange, K(L.T("Deshacer"), "Ctrl+Z"), K(L.T("Rehacer"), "Ctrl+Y")),
                     C(Purple, K("Negrita", "Ctrl+N"), K("Cursiva", "Ctrl+K"), K("Subrayado", "Ctrl+S")),
                     C(Green, K("Buscar", "Ctrl+B"), K("Reemplazar", "Ctrl+L")),
-                    C(Blue, K("Imprimir", "Ctrl+P"), K("Nuevo", "Ctrl+U"), K("Seleccionar todo", "Ctrl+E")))),
+                    C(Blue, K("Imprimir", "Ctrl+P"), K(L.T("Nuevo"), "Ctrl+U"), K("Seleccionar todo", "Ctrl+E")))),
             };
         }
     }
@@ -564,10 +925,10 @@ namespace PadBox
             {"Esc", Keys.Escape}, {"Enter", Keys.Return}, {"Supr", Keys.Delete}, {"Del", Keys.Delete}, {"Espacio", Keys.Space},
             {"PgUp", Keys.PageUp}, {"PgDn", Keys.PageDown}, {"Izquierda", Keys.Left}, {"Derecha", Keys.Right}, {"Arriba", Keys.Up}, {"Abajo", Keys.Down} };
         static readonly Dictionary<string, string> Nice = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
-            {"Add", "Num +"}, {"Subtract", "Num −"}, {"Left", "←"}, {"Right", "→"}, {"Up", "↑"}, {"Down", "↓"}, {"Space", "Espacio"},
-            {"Return", "Enter"}, {"Escape", "Esc"}, {"VolumeUp", "Vol +"}, {"VolumeDown", "Vol −"}, {"VolumeMute", "Silencio"},
-            {"MediaPlayPause", "Play/Pausa"}, {"MediaNextTrack", "Pista siguiente"}, {"MediaPreviousTrack", "Pista anterior"},
-            {"Next", "PgDn"}, {"PageDown", "PgDn"}, {"Prior", "PgUp"}, {"PageUp", "PgUp"}, {"Delete", "Supr"}, {"Back", "Retroceso"} };
+            {"Add", "Num +"}, {"Subtract", "Num −"}, {"Left", "←"}, {"Right", "→"}, {"Up", "↑"}, {"Down", "↓"}, {"Space", L.T("Espacio")},
+            {"Return", "Enter"}, {"Escape", "Esc"}, {"VolumeUp", "Vol +"}, {"VolumeDown", "Vol −"}, {"VolumeMute", L.T("Silencio")},
+            {"MediaPlayPause", L.T("Play/Pausa")}, {"MediaNextTrack", L.T("Pista siguiente")}, {"MediaPreviousTrack", L.T("Pista anterior")},
+            {"Next", "PgDn"}, {"PageDown", "PgDn"}, {"Prior", "PgUp"}, {"PageUp", "PgUp"}, {"Delete", L.T("Supr")}, {"Back", L.T("Retroceso")} };
 
         // Devuelve los códigos de tecla virtuales en orden de pulsación, o null si el texto no es válido.
         public static List<int> Parse(string s)
@@ -590,7 +951,7 @@ namespace PadBox
 
         public static string Pretty(string s)
         {
-            if (Parse(s) == null) return "Atajo no válido";
+            if (Parse(s) == null) return L.T("Atajo no válido");
             return string.Join(" + ", s.Split('+').Select(p => {
                 var t = p.Trim(); string n;
                 if (t.Length == 2 && t[0] == 'D' && char.IsDigit(t[1])) return t.Substring(1);
@@ -892,7 +1253,7 @@ namespace PadBox
     static class Sounds
     {
         public static readonly string[] Extensions = { ".mp3", ".wav", ".wma", ".m4a", ".aac", ".aif", ".aiff", ".mp2", ".snd", ".au" };
-        public const string Filter = "Sonidos|*.mp3;*.wav;*.wma;*.m4a;*.aac;*.aif;*.aiff;*.mp2;*.snd;*.au|Todos los archivos|*.*";
+        public static readonly string Filter = L.T("Sonidos|*.mp3;*.wav;*.wma;*.m4a;*.aac;*.aif;*.aiff;*.mp2;*.snd;*.au|Todos los archivos|*.*");
         static string Dir { get { return Path.Combine(AppPaths.Data, "Sonidos"); } }
 
         public static bool IsAudio(string path) { return Extensions.Contains((Path.GetExtension(path) ?? "").ToLowerInvariant()); }
@@ -1136,7 +1497,7 @@ namespace PadBox
 
         // Ritmos disponibles (clave, nombre para mostrar), en el orden del editor
         public static readonly string[] Keys = { "cumbia", "villera", "cuarteto", "vallenato", "rebajada", "rock", "balada", "blues", "bossa", "dembow", "house", "techno", "dubstep" };
-        public static readonly string[] Display = { "Cumbia", "Cumbia villera", "Cuarteto", "Vallenato", "Cumbia rebajada", "Rock", "Balada", "Blues (shuffle)", "Bossa nova", "Reggaetón (dembow)", "House", "Techno", "Dubstep" };
+        public static readonly string[] Display = { "Cumbia", L.T("Cumbia villera"), L.T("Cuarteto"), "Vallenato", L.T("Cumbia rebajada"), "Rock", L.T("Balada"), "Blues (shuffle)", "Bossa nova", L.T("Reggaetón (dembow)"), "House", "Techno", "Dubstep" };
         public static string DisplayName(string key) { int i = Array.IndexOf(Keys, (key ?? "").ToLowerInvariant()); return i >= 0 ? Display[i] : key; }
 
         // Un compás de 16 semicorcheas: {paso 0-15, nota GM, velocidad}
@@ -1443,7 +1804,7 @@ namespace PadBox
                 lock (ioLock)
                 {
                     try { ApplyNow(c, n); }
-                    catch (Exception ex) { Say("Luces: " + ex.Message); }
+                    catch (Exception ex) { Say(L.T("Luces: ") + ex.Message); }
                 }
             }
         }
@@ -1452,7 +1813,7 @@ namespace PadBox
         {
             int bankBase = ActiveBankBase();
             byte[] recs = bankBase < 0 ? null : ReadReg(5, bankBase, BankBytes);
-            if (recs == null) { Say("Luces: el SMC-PAD no respondió."); return; }
+            if (recs == null) { Say(L.T("Luces: el SMC-PAD no respondió.")); return; }
             if (!originals.ContainsKey(bankBase))
             {
                 var orig = new byte[48];
@@ -1469,7 +1830,7 @@ namespace PadBox
                 if (r < 0) continue;
                 int at = r * RecSize + 5;
                 if (recs[at] == c[i].R && recs[at + 1] == c[i].G && recs[at + 2] == c[i].B) continue;
-                if (!WriteReg(5, bankBase + at, new[] { c[i].R, c[i].G, c[i].B })) { Say("Luces: el SMC-PAD no confirmó el cambio de color."); return; }
+                if (!WriteReg(5, bankBase + at, new[] { c[i].R, c[i].G, c[i].B })) { Say(L.T("Luces: el SMC-PAD no confirmó el cambio de color.")); return; }
             }
         }
 
@@ -1540,7 +1901,7 @@ namespace PadBox
             if (Note.Length > 0)
                 TextRenderer.DrawText(g, Note, Theme.Small, new Rectangle(0, pad - 4, Width - pad, subH), Theme.Muted, TextFormatFlags.Right);
             var titleRect = new Rectangle(pad, pad + top, Width - 2 * pad, Height - 2 * pad - subH - top);
-            TextRenderer.DrawText(g, Title.Length > 0 ? Title : "(vacío)", Theme.Bold, titleRect, Title.Length > 0 ? (Hit ? Color.White : Theme.Text) : Theme.Muted,
+            TextRenderer.DrawText(g, Title.Length > 0 ? Title : L.T("(vacío)"), Theme.Bold, titleRect, Title.Length > 0 ? (Hit ? Color.White : Theme.Text) : Theme.Muted,
                 TextFormatFlags.Bottom | TextFormatFlags.Left | TextFormatFlags.WordBreak | TextFormatFlags.EndEllipsis);
             TextRenderer.DrawText(g, Sub, Theme.Small, new Rectangle(pad, Height - pad - subH, Width - 2 * pad, subH), Hit ? Color.White : Theme.Muted,
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.SingleLine);
@@ -1636,8 +1997,8 @@ namespace PadBox
 
         const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run", RunName = "PadBox", OldRunName = "SMC-Pad Control";
         static readonly string[] TypeIds = { "keys", "text", "run", "sound", "note", "chord", "seq", "loop", "cc", "toggle", "pc", "none" };
-        static readonly string[] TypeNames = { "Atajo de teclado", "Escribir texto", "Abrir programa o web", "Sonido (mp3, wav…)", "Nota MIDI", "Acorde MIDI", "Melodía paso a paso", "Ritmo en bucle (on/off)", "CC momentáneo", "CC on/off", "Program Change", "Nada" };
-        static readonly string[] SoundModes = { "Una vez (suena completo)", "Mientras mantienes el pad", "Bucle on/off" };
+        static readonly string[] TypeNames = { L.T("Atajo de teclado"), L.T("Escribir texto"), L.T("Abrir programa o web"), L.T("Sonido (mp3, wav…)"), L.T("Nota MIDI"), L.T("Acorde MIDI"), L.T("Melodía paso a paso"), L.T("Ritmo en bucle (on/off)"), L.T("CC momentáneo"), "CC on/off", "Program Change", L.T("Nada") };
+        static readonly string[] SoundModes = { L.T("Una vez (suena completo)"), L.T("Mientras mantienes el pad"), L.T("Bucle on/off") };
         static readonly string[] TextTypes = { "text", "run", "seq" };
         static readonly string[] MidiTypes = { "note", "chord", "loop", "cc", "toggle", "pc" };
 
@@ -1784,15 +2145,15 @@ namespace PadBox
             var flow = topFlow;
             top.Controls.Add(flow);
             var title = new Label { Text = "PadBox", Font = Theme.Title, AutoSize = true, Margin = new Padding(0, 1, 18, 0) };
-            btnMusic = MkButton("MÚSICA", 104); btnMusic.Font = Theme.Bold;
-            btnOffice = MkButton("OFICINA", 104); btnOffice.Font = Theme.Bold;
+            btnMusic = MkButton(L.T("MÚSICA"), 104); btnMusic.Font = Theme.Bold;
+            btnOffice = MkButton(L.T("OFICINA"), 104); btnOffice.Font = Theme.Bold;
             btnMusic.Click += (s, e) => SetMode(false);
             btnOffice.Click += (s, e) => SetMode(true);
             cboPreset = MkCombo(220);
             cboPreset.SelectedIndexChanged += (s, e) => { if (!loading && cboPreset.SelectedIndex >= 0) SelectPreset(cboPreset.SelectedIndex); };
             btnIcon = MkButton("", 40);
             btnIcon.ImageAlign = ContentAlignment.MiddleCenter;
-            new ToolTip().SetToolTip(btnIcon, "Cambiar el ícono del preset");
+            new ToolTip().SetToolTip(btnIcon, L.T("Cambiar el ícono del preset"));
             int ip = (int)(26 * uiScale);
             var iconMenu = new ContextMenuStrip { ImageScalingSize = new Size(ip, ip), LayoutStyle = ToolStripLayoutStyle.Table };
             ((TableLayoutSettings)iconMenu.LayoutSettings).ColumnCount = 3;
@@ -1802,10 +2163,10 @@ namespace PadBox
                 iconMenu.Items.Add(d.Name, Icons.Bitmap(key, ip), (s, e) => { Cur.Icon = key; RefreshAll(); ShowOsd(); ScheduleSave(); });
             }
             btnIcon.Click += (s, e) => iconMenu.Show(btnIcon, new Point(0, btnIcon.Height));
-            var bNew = MkButton("Nuevo", 64); bNew.Click += (s, e) => NewPreset(false);
-            var bDup = MkButton("Duplicar", 80); bDup.Click += (s, e) => NewPreset(true);
-            var bRen = MkButton("Renombrar", 92); bRen.Click += (s, e) => RenamePreset();
-            var bDel = MkButton("Borrar", 64); bDel.Click += (s, e) => DeletePreset();
+            var bNew = MkButton(L.T("Nuevo"), 64); bNew.Click += (s, e) => NewPreset(false);
+            var bDup = MkButton(L.T("Duplicar"), 80); bDup.Click += (s, e) => NewPreset(true);
+            var bRen = MkButton(L.T("Renombrar"), 92); bRen.Click += (s, e) => RenamePreset();
+            var bDel = MkButton(L.T("Borrar"), 64); bDel.Click += (s, e) => DeletePreset();
             flow.Controls.AddRange(new Control[] { title, btnMusic, btnOffice, Inline("Preset:", 18), btnIcon, cboPreset, bNew, bDup, bRen, bDel });
 
             // editor
@@ -1813,7 +2174,7 @@ namespace PadBox
             var editor = new Panel { Dock = DockStyle.Right, Width = 350 + 18, BackColor = Theme.Panel, AutoScroll = true };
             lblPad = new Label { Left = 18, Top = 16, AutoSize = true, Font = Theme.Title };
             editor.Controls.Add(lblPad);
-            Cap(editor, "Nombre", 18, 56);
+            Cap(editor, L.T("Nombre"), 18, 56);
             txtName = MkText(editor, 18, 76, 312);
             txtName.TextChanged += (s, e) => Edit(a => a.Name = txtName.Text);
             lblFixed = new Label { Left = 18, Top = 118, Width = 312, Height = 260, ForeColor = Theme.Muted };
@@ -1821,43 +2182,43 @@ namespace PadBox
 
             grpAction = new Panel { Left = 0, Top = 112, Width = 350, Height = 428 };
             editor.Controls.Add(grpAction);
-            Cap(grpAction, "Acción", 18, 0);
+            Cap(grpAction, L.T("Acción"), 18, 0);
             cboType = MkCombo(312); cboType.Left = 18; cboType.Top = 20; cboType.Margin = Padding.Empty;
             cboType.Items.AddRange(TypeNames);
             cboType.SelectedIndexChanged += (s, e) => OnTypeChanged();
             grpAction.Controls.Add(cboType);
 
             grpKeys = new Panel { Left = 0, Top = 60, Width = 350, Height = 200 };
-            Cap(grpKeys, "Atajo", 18, 0);
+            Cap(grpKeys, L.T("Atajo"), 18, 0);
             txtKeys = MkText(grpKeys, 18, 20, 204);
             txtKeys.TextChanged += (s, e) => { Edit(a => a.Value = txtKeys.Text.Trim()); Validate(); };
-            btnRec = MkButton("Grabar", 100); btnRec.Left = 230; btnRec.Top = 18;
+            btnRec = MkButton(L.T("Grabar"), 100); btnRec.Left = 230; btnRec.Top = 18;
             btnRec.Click += (s, e) => { if (recording) StopRec(); else StartRec(); };
             grpKeys.Controls.Add(btnRec);
             lblHelpKeys = new Label { Left = 18, Top = 58, Width = 312, Height = 130, ForeColor = Theme.Muted, Font = Theme.Small,
-                Text = "Pulsa «Grabar» y luego la combinación en tu teclado, o escríbela.\n\nEjemplos: Ctrl+Shift+N · Win+D · Alt+Tab · F5\nTeclas especiales: Space, Enter, Esc, Delete, Left, Right, Add (Num +), VolumeUp, VolumeMute, MediaPlayPause\n\nLa tecla queda presionada mientras sostienes el pad." };
+                Text = L.T("Pulsa «Grabar» y luego la combinación en tu teclado, o escríbela.\n\nEjemplos: Ctrl+Shift+N · Win+D · Alt+Tab · F5\nTeclas especiales: Space, Enter, Esc, Delete, Left, Right, Add (Num +), VolumeUp, VolumeMute, MediaPlayPause\n\nLa tecla queda presionada mientras sostienes el pad.") };
             grpKeys.Controls.Add(lblHelpKeys);
 
             grpText = new Panel { Left = 0, Top = 60, Width = 350, Height = 200 };
-            lblTextCap = Cap(grpText, "Texto, programa o página web", 18, 0);
+            lblTextCap = Cap(grpText, L.T("Texto, programa o página web"), 18, 0);
             txtValue = MkText(grpText, 18, 20, 312);
             txtValue.TextChanged += (s, e) => { Edit(a => a.Value = txtValue.Text); Validate(); };
-            btnBrowse = MkButton("Examinar…", 110); btnBrowse.Left = 18; btnBrowse.Top = 54;
+            btnBrowse = MkButton(L.T("Examinar…"), 110); btnBrowse.Left = 18; btnBrowse.Top = 54;
             btnBrowse.Click += (s, e) => Browse();
             grpText.Controls.Add(btnBrowse);
             lblHelpText = new Label { Left = 18, Top = 96, Width = 312, Height = 90, ForeColor = Theme.Muted, Font = Theme.Small };
             grpText.Controls.Add(lblHelpText);
-            chkScoop = new CheckBox { Left = 18, Top = 54, AutoSize = true, Text = "«Gemido» al empezar (pitch bend)" };
+            chkScoop = new CheckBox { Left = 18, Top = 54, AutoSize = true, Text = L.T("«Gemido» al empezar (pitch bend)") };
             chkScoop.CheckedChanged += (s, e) => Edit(a => a.Scoop = chkScoop.Checked);
             grpText.Controls.Add(chkScoop);
 
             grpMidi = new Panel { Left = 0, Top = 60, Width = 350, Height = 200 };
-            lblNumCap = Cap(grpMidi, "Nota", 18, 0);
+            lblNumCap = Cap(grpMidi, L.T("Nota"), 18, 0);
             numNum = MkNum(grpMidi, 18, 20, 0, 127);
             numNum.ValueChanged += (s, e) => OnNumChanged();
             lblNote = new Label { Left = 104, Top = 23, AutoSize = true, Font = Theme.Bold };
             grpMidi.Controls.Add(lblNote);
-            lblChordCap = Cap(grpMidi, "Acorde", 170, 0);
+            lblChordCap = Cap(grpMidi, L.T("Acorde"), 170, 0);
             cboChord = MkCombo(160); cboChord.Left = 170; cboChord.Top = 20; cboChord.Margin = Padding.Empty;
             cboChord.Items.AddRange(Mus.ChordIds.Select(Mus.ChordName).ToArray());
             cboChord.SelectedIndexChanged += (s, e) => OnChordChanged();
@@ -1866,33 +2227,33 @@ namespace PadBox
             cboPattern.Items.AddRange(Looper.Display);
             cboPattern.SelectedIndexChanged += (s, e) => { if (cboPattern.SelectedIndex >= 0) Edit(a => a.Value = Looper.Keys[cboPattern.SelectedIndex]); };
             grpMidi.Controls.Add(cboPattern);
-            Cap(grpMidi, "Canal", 18, 60);
+            Cap(grpMidi, L.T("Canal"), 18, 60);
             numCh = MkNum(grpMidi, 18, 80, 1, 16);
             numCh.ValueChanged += (s, e) => Edit(a => a.Ch = (int)numCh.Value);
-            lblVelCap = Cap(grpMidi, "Velocidad (0 = según golpe)", 120, 60);
+            lblVelCap = Cap(grpMidi, L.T("Velocidad (0 = según golpe)"), 120, 60);
             numVel = MkNum(grpMidi, 120, 80, 0, 127);
             numVel.ValueChanged += (s, e) => Edit(a => a.Vel = (int)numVel.Value);
 
             grpSound = new Panel { Left = 0, Top = 60, Width = 350, Height = 200 };
-            Cap(grpSound, "Archivo de sonido", 18, 0);
+            Cap(grpSound, L.T("Archivo de sonido"), 18, 0);
             txtSound = MkText(grpSound, 18, 20, 312);
             txtSound.ReadOnly = true;
-            var bPick = MkButton("Elegir sonido…", 140); bPick.Left = 18; bPick.Top = 52;
+            var bPick = MkButton(L.T("Elegir sonido…"), 140); bPick.Left = 18; bPick.Top = 52;
             bPick.Click += (s, e) => PickSound();
             grpSound.Controls.Add(bPick);
-            Cap(grpSound, "Modo", 18, 94);
+            Cap(grpSound, L.T("Modo"), 18, 94);
             cboSoundMode = MkCombo(200); cboSoundMode.Left = 18; cboSoundMode.Top = 114; cboSoundMode.Margin = Padding.Empty;
             cboSoundMode.Items.AddRange(SoundModes);
             cboSoundMode.SelectedIndexChanged += (s, e) => { if (cboSoundMode.SelectedIndex >= 0) Edit(a => a.Num = cboSoundMode.SelectedIndex); };
             grpSound.Controls.Add(cboSoundMode);
-            Cap(grpSound, "Volumen (0 = golpe)", 228, 94);
+            Cap(grpSound, L.T("Volumen (0 = golpe)"), 228, 94);
             numSoundVol = MkNum(grpSound, 228, 114, 0, 127);
             numSoundVol.Width = 70;
             numSoundVol.ValueChanged += (s, e) => Edit(a => a.Vel = (int)numSoundVol.Value);
             grpSound.Controls.Add(new Label { Left = 18, Top = 152, Width = 312, Height = 44, ForeColor = Theme.Muted, Font = Theme.Small,
-                Text = "También puedes arrastrar archivos de audio desde el Explorador y soltarlos sobre un pad." });
+                Text = L.T("También puedes arrastrar archivos de audio desde el Explorador y soltarlos sobre un pad.") });
             grpAction.Controls.AddRange(new Control[] { grpKeys, grpText, grpMidi, grpSound });
-            Cap(grpAction, "Color en el pad", 18, 264);
+            Cap(grpAction, L.T("Color en el pad"), 18, 264);
             for (int k = 0; k < SwatchColors.Length; k++)
             {
                 var hex = SwatchColors[k];
@@ -1900,16 +2261,16 @@ namespace PadBox
                     Font = Theme.Small, ForeColor = Color.Black, Text = hex.Length == 0 ? "P" : "" };
                 Color col;
                 if (TryColor(hex, out col)) sw.BackColor = col;
-                new ToolTip().SetToolTip(sw, hex.Length == 0 ? "Color del preset" : "Usar este color");
+                new ToolTip().SetToolTip(sw, hex.Length == 0 ? L.T("Color del preset") : L.T("Usar este color"));
                 sw.Click += (s, e) => { Edit(a => a.Color = hex); RefreshSwatches(); UpdatePadColors(); };
                 swatches.Add(sw);
                 grpAction.Controls.Add(sw);
             }
-            btnTest = MkButton("▶  Probar", 130); btnTest.Left = 18; btnTest.Top = 326;
+            btnTest = MkButton(L.T("▶  Probar"), 130); btnTest.Left = 18; btnTest.Top = 326;
             btnTest.Click += (s, e) => TestPad();
             grpAction.Controls.Add(btnTest);
             var hint = new Label { Left = 18, Top = 368, Width = 312, Height = 64, ForeColor = Theme.Muted, Font = Theme.Small,
-                Text = "Los cambios se guardan solos.\nPad 1: modo · Pad 2: preset anterior · Pad 3: preset siguiente." };
+                Text = L.T("Los cambios se guardan solos.\nPad 1: modo · Pad 2: preset anterior · Pad 3: preset siguiente.") };
             grpAction.Controls.Add(hint);
 
             // barra inferior
@@ -1921,18 +2282,28 @@ namespace PadBox
             cboIn.SelectedIndexChanged += (s, e) => { if (loading) return; cfg.InPort = (string)cboIn.SelectedItem; OpenIn(); ScheduleSave(); };
             cboOut = MkCombo(230);
             cboOut.SelectedIndexChanged += (s, e) => { if (loading) return; cfg.OutPort = (string)cboOut.SelectedItem; OpenOut(true); ScheduleSave(); };
-            var bRefresh = MkButton("Actualizar", 92); bRefresh.Click += (s, e) => FillPorts();
-            btnDetect = MkButton("Detectar pads", 116); btnDetect.Click += (s, e) => ToggleDetect();
+            var bRefresh = MkButton(L.T("Actualizar"), 92); bRefresh.Click += (s, e) => FillPorts();
+            btnDetect = MkButton(L.T("Detectar pads"), 116); btnDetect.Click += (s, e) => ToggleDetect();
             lblConn = new Label { AutoSize = true, Margin = new Padding(6, 8, 10, 0), Font = Theme.Bold };
-            chkOsd = new CheckBox { Text = "Aviso en pantalla al cambiar", AutoSize = true, Margin = new Padding(0, 7, 14, 0), Checked = !cfg.HideOsd };
+            chkOsd = new CheckBox { Text = L.T("Aviso en pantalla al cambiar"), AutoSize = true, Margin = new Padding(0, 7, 14, 0), Checked = !cfg.HideOsd };
             chkOsd.CheckedChanged += (s, e) => { cfg.HideOsd = !chkOsd.Checked; ScheduleSave(); };
-            chkStartup = new CheckBox { Text = "Iniciar con Windows", AutoSize = true, Margin = new Padding(0, 7, 14, 0), Checked = StartupEnabled() };
+            chkStartup = new CheckBox { Text = L.T("Iniciar con Windows"), AutoSize = true, Margin = new Padding(0, 7, 14, 0), Checked = StartupEnabled() };
             chkStartup.CheckedChanged += (s, e) => { if (!loading) SetStartup(chkStartup.Checked); };
-            var bReset = MkButton("Restaurar presets", 136); bReset.Click += (s, e) => ResetPresets();
-            var chkLights = new CheckBox { Text = "Colores en el pad", AutoSize = true, Margin = new Padding(0, 7, 14, 0), Checked = !cfg.NoPadLights };
+            var bReset = MkButton(L.T("Restaurar presets"), 136); bReset.Click += (s, e) => ResetPresets();
+            var cboLang = MkCombo(120);
+            cboLang.Items.AddRange(new object[] { L.T("Automático"), "Español", "English" });
+            cboLang.SelectedIndex = cfg.Lang == "es" ? 1 : cfg.Lang == "en" ? 2 : 0;
+            cboLang.SelectedIndexChanged += (s, e) =>
+            {
+                if (loading) return;
+                cfg.Lang = cboLang.SelectedIndex == 1 ? "es" : cboLang.SelectedIndex == 2 ? "en" : null;
+                ScheduleSave();
+                Status(L.T("El idioma cambiará la próxima vez que abras PadBox. Con «Restaurar presets» los presets quedan en ese idioma."));
+            };
+            var chkLights = new CheckBox { Text = L.T("Colores en el pad"), AutoSize = true, Margin = new Padding(0, 7, 14, 0), Checked = !cfg.NoPadLights };
             chkLights.CheckedChanged += (s, e) => { cfg.NoPadLights = !chkLights.Checked; ScheduleSave(); if (cfg.NoPadLights) StopLights(true); else StartLights(); };
             cboDevice = MkCombo(240);
-            cboDevice.Items.Add("Automático");
+            cboDevice.Items.Add(L.T("Automático"));
             foreach (var d in Devices.All) cboDevice.Items.Add(d.Name);
             int di = Devices.All.FindIndex(d => d.Id == cfg.Device);
             cboDevice.SelectedIndex = di >= 0 ? di + 1 : 0;
@@ -1943,7 +2314,7 @@ namespace PadBox
                 OpenIn();   // vuelve a abrir con el perfil nuevo (notas, número de pads y luces)
                 RefreshAll();
             };
-            bflow.Controls.AddRange(new Control[] { lblConn, Inline("Controlador:", 0), cboDevice, Inline("Entrada:", 8), cboIn, Inline("Salida música:", 8), cboOut, bRefresh, btnDetect, chkOsd, chkStartup, chkLights, bReset });
+            bflow.Controls.AddRange(new Control[] { lblConn, Inline(L.T("Controlador:"), 0), cboDevice, Inline(L.T("Entrada:"), 8), cboIn, Inline(L.T("Salida música:"), 8), cboOut, bRefresh, btnDetect, chkOsd, chkStartup, chkLights, bReset, Inline(L.T("Idioma:"), 8), cboLang });
             bottom.Controls.Add(bflow);
             bottom.Controls.Add(lblStatus);
 
@@ -2006,11 +2377,11 @@ namespace PadBox
         void BuildTray()
         {
             var menu = new ContextMenuStrip();
-            menu.Items.Add("Abrir", null, (s, e) => ShowMain());
-            menu.Items.Add("Modo música", null, (s, e) => SetMode(false));
-            menu.Items.Add("Modo oficina", null, (s, e) => SetMode(true));
+            menu.Items.Add(L.T("Abrir"), null, (s, e) => ShowMain());
+            menu.Items.Add(L.T("Modo música"), null, (s, e) => SetMode(false));
+            menu.Items.Add(L.T("Modo oficina"), null, (s, e) => SetMode(true));
             menu.Items.Add(new ToolStripSeparator());
-            menu.Items.Add("Salir", null, (s, e) => Quit());
+            menu.Items.Add(L.T("Salir"), null, (s, e) => Quit());
             tray = new NotifyIcon { Icon = Icon, Text = "PadBox", Visible = true, ContextMenuStrip = menu };
             tray.DoubleClick += (s, e) => ShowMain();
         }
@@ -2086,7 +2457,7 @@ namespace PadBox
             {
                 e.Cancel = true;
                 Hide();
-                if (!tipShown) { tray.ShowBalloonTip(3000, "PadBox sigue activo", "Los pads siguen funcionando. Ábrelo desde el icono junto al reloj.", ToolTipIcon.Info); tipShown = true; }
+                if (!tipShown) { tray.ShowBalloonTip(3000, L.T("PadBox sigue activo"), L.T("Los pads siguen funcionando. Ábrelo desde el icono junto al reloj."), ToolTipIcon.Info); tipShown = true; }
                 return;
             }
             ReleaseAll();
@@ -2110,7 +2481,8 @@ namespace PadBox
             try { if (!File.Exists(cfgPath) && File.Exists(oldCfg)) File.Copy(oldCfg, cfgPath); } catch (IOException) { }
             try { if (File.Exists(cfgPath)) c = new JavaScriptSerializer().Deserialize<Config>(File.ReadAllText(cfgPath, Encoding.UTF8)); }
             catch { try { File.Copy(cfgPath, cfgPath + ".dañado", true); } catch { } }
-            if (c == null) c = new Config();
+            // Configuración nueva: los presets por defecto ya están al día (y en el idioma de la app), sin migraciones
+            if (c == null) c = new Config { Version = 14 };
             if (c.InNotes == null || c.InNotes.Count != 16) c.InNotes = Enumerable.Range(36, 16).ToList();
             if (c.Music == null || c.Music.Count == 0) c.Music = Defaults.Music();
             if (c.Office == null || c.Office.Count == 0) c.Office = Defaults.Office();
@@ -2249,7 +2621,7 @@ namespace PadBox
         void SaveConfig()
         {
             try { File.WriteAllText(cfgPath, new JavaScriptSerializer().Serialize(cfg), Encoding.UTF8); }
-            catch (Exception ex) { Status("No se pudo guardar la configuración: " + ex.Message); }
+            catch (Exception ex) { Status(L.T("No se pudo guardar la configuración: ") + ex.Message); }
         }
 
         static bool StartupEnabled()
@@ -2277,9 +2649,9 @@ namespace PadBox
                 {
                     if (!on) { PackagedStartup.Disable(); return; }
                     if (PackagedStartup.Enable()) return;
-                    Status("Windows no dejó activar el inicio automático. Actívalo en Configuración → Aplicaciones → Inicio.");
+                    Status(L.T("Windows no dejó activar el inicio automático. Actívalo en Configuración → Aplicaciones → Inicio."));
                 }
-                catch (Exception ex) { Status("No se pudo cambiar el inicio automático: " + ex.Message); }
+                catch (Exception ex) { Status(L.T("No se pudo cambiar el inicio automático: ") + ex.Message); }
                 // no quedó activado: la casilla vuelve a mostrar el estado real
                 loading = true; chkStartup.Checked = false; loading = false;
                 return;
@@ -2293,7 +2665,7 @@ namespace PadBox
                     else k.DeleteValue(RunName, false);
                 }
             }
-            catch (Exception ex) { Status("No se pudo cambiar el inicio automático: " + ex.Message); }
+            catch (Exception ex) { Status(L.T("No se pudo cambiar el inicio automático: ") + ex.Message); }
         }
 
         // ---------- puertos MIDI ----------
@@ -2315,9 +2687,9 @@ namespace PadBox
                 cfg.OutPort = outs.FirstOrDefault(n => n.IndexOf("loop", StringComparison.OrdinalIgnoreCase) >= 0)
                     ?? outs.FirstOrDefault(n => n.IndexOf("GS Wavetable", StringComparison.OrdinalIgnoreCase) >= 0) ?? "";
             cboIn.Items.Clear(); cboIn.Items.AddRange(ins.ToArray());
-            cboOut.Items.Clear(); cboOut.Items.Add("(ninguna)"); cboOut.Items.AddRange(outs.ToArray());
+            cboOut.Items.Clear(); cboOut.Items.Add(L.T("(ninguna)")); cboOut.Items.AddRange(outs.ToArray());
             cboIn.SelectedItem = ins.Contains(cfg.InPort) ? cfg.InPort : null;
-            cboOut.SelectedItem = outs.Contains(cfg.OutPort) ? cfg.OutPort : "(ninguna)";
+            cboOut.SelectedItem = outs.Contains(cfg.OutPort) ? cfg.OutPort : L.T("(ninguna)");
             loading = false;
             OpenIn();
             OpenOut(false);
@@ -2394,19 +2766,19 @@ namespace PadBox
             if (midiIn != null) { midiIn.Dispose(); midiIn = null; }
             ApplyProfile();
             int id = Winmm.Inputs().IndexOf(cfg.InPort ?? "");
-            if (id < 0) { Status("Conecta tu controlador MIDI por USB…"); UpdateConn(); return; }
+            if (id < 0) { Status(L.T("Conecta tu controlador MIDI por USB…")); UpdateConn(); return; }
             var m = new MidiIn();
             m.Message += (st, d1, d2) => BeginInvoke(new Action(() => OnMidi(st, d1, d2)));
-            m.Closed += () => BeginInvoke(new Action(() => { if (midiIn == m) { StopLights(false); midiIn.Dispose(); midiIn = null; Status("Controlador desconectado. Esperando a que vuelva…"); UpdateConn(); } }));
+            m.Closed += () => BeginInvoke(new Action(() => { if (midiIn == m) { StopLights(false); midiIn.Dispose(); midiIn = null; Status(L.T("Controlador desconectado. Esperando a que vuelva…")); UpdateConn(); } }));
             m.SysEx += data => { var l = lights; if (l != null) l.OnSysEx(data); };
             if (m.Open(id, cfg.InPort))
             {
                 midiIn = m;
-                Status("Conectado a " + cfg.InPort + " (" + profile.Name + "). Toca un pad.");
+                Status(L.T("Conectado a ") + cfg.InPort + " (" + profile.Name + L.T("). Toca un pad."));
                 PrepareDevice();
                 StartLights();
             }
-            else { m.Dispose(); Status("No se pudo abrir «" + cfg.InPort + "». ¿Lo está usando otro programa (DAW o navegador)? Ciérralo y pulsa Actualizar."); }
+            else { m.Dispose(); Status(L.T("No se pudo abrir «") + cfg.InPort + L.T("». ¿Lo está usando otro programa (DAW o navegador)? Ciérralo y pulsa Actualizar.")); }
             UpdateConn();
         }
 
@@ -2420,7 +2792,7 @@ namespace PadBox
             if (id < 0) return;
             var o = new MidiOut();
             if (o.Open(id, name)) { midiOut = o; Array.Clear(lastProgram, 0, 3); lastProgram[2] = 1; ApplyProgram(); }
-            else Status("No se pudo abrir la salida «" + name + "».");
+            else Status(L.T("No se pudo abrir la salida «") + name + L.T("»."));
         }
 
         // Cambia el instrumento de los canales 1 y 2 si el preset lo pide (p. ej. acordeón en Cumbia) y vuelve al piano después.
@@ -2447,7 +2819,7 @@ namespace PadBox
 
         void UpdateConn()
         {
-            lblConn.Text = midiIn != null ? "● Pad conectado" : "● Sin pad";
+            lblConn.Text = midiIn != null ? L.T("● Pad conectado") : L.T("● Sin pad");
             lblConn.ForeColor = midiIn != null ? Theme.Ok : Theme.Err;
         }
 
@@ -2464,11 +2836,11 @@ namespace PadBox
             if (i >= PadCount) i = -1;   // pads que este aparato no tiene
             if (i >= 0 && (on || off || t == 0xA0))
             {
-                if (on) { PadDown(i, d2); Status("Pad " + (i + 1) + " · nota " + Mus.NoteName(d1) + " (" + d1 + ") · fuerza " + d2); }
+                if (on) { PadDown(i, d2); Status("Pad " + (i + 1) + L.T(" · nota ") + Mus.NoteName(d1) + " (" + d1 + L.T(") · fuerza ") + d2); }
                 else if (off) PadUp(i);
                 return;
             }
-            if (on) Status("El pad mandó la nota " + Mus.NoteName(d1) + " (" + d1 + "), que no está asignada. Usa «Detectar pads».");
+            if (on) Status(L.T("El pad mandó la nota ") + Mus.NoteName(d1) + " (" + d1 + L.T("), que no está asignada. Usa «Detectar pads»."));
             if (!cfg.OfficeMode && midiOut != null) midiOut.Send(st, d1, d2);   // otros mensajes pasan tal cual
         }
 
@@ -2496,7 +2868,7 @@ namespace PadBox
             {
                 case "keys":
                     var vks = Shortcut.Parse(a.Value);
-                    if (vks == null) { Status("El atajo «" + a.Value + "» no es válido."); return; }
+                    if (vks == null) { Status(L.T("El atajo «") + a.Value + L.T("» no es válido.")); return; }
                     Kbd.Down(vks);
                     heldKeys[i] = vks;
                     break;
@@ -2506,7 +2878,7 @@ namespace PadBox
                 case "run":
                     if (a.Value.Trim().Length == 0) return;
                     try { Process.Start(new ProcessStartInfo(a.Value.Trim()) { UseShellExecute = true }); }
-                    catch (Exception ex) { Status("No se pudo abrir «" + a.Value + "»: " + ex.Message); }
+                    catch (Exception ex) { Status(L.T("No se pudo abrir «") + a.Value + L.T("»: ") + ex.Message); }
                     break;
                 case "note":
                 case "chord":
@@ -2518,7 +2890,7 @@ namespace PadBox
                 case "seq":
                     var starts = new HashSet<int>();
                     var seq = Mus.ParseSeq(a.Value, starts);
-                    if (seq == null || seq.Count == 0) { Status("La melodía de «" + a.Name + "» tiene notas no válidas."); return; }
+                    if (seq == null || seq.Count == 0) { Status(L.T("La melodía de «") + a.Name + L.T("» tiene notas no válidas.")); return; }
                     int pos; DateTime last;
                     // Vuelve al inicio si llegó al final o si pasó un rato sin tocarlo (Num = segundos; 0 = 2,5 s)
                     double idle = a.Num > 0 ? a.Num : 2.5;
@@ -2527,7 +2899,7 @@ namespace PadBox
                     Out(0x90 | ch, seq[pos], v);
                     heldMidi[i] = new[] { 0x80 | ch, seq[pos], 0 };
                     seqPos[i] = pos + 1; seqLast[i] = DateTime.Now;
-                    pads[i].Sub = "Nota " + (pos + 1) + " de " + seq.Count + " · " + Mus.NoteName(seq[pos]);
+                    pads[i].Sub = L.T("Nota ") + (pos + 1) + L.T(" de ") + seq.Count + " · " + Mus.NoteName(seq[pos]);
                     break;
                 case "cc":
                     Out(0xB0 | ch, a.Num, val);
@@ -2544,8 +2916,8 @@ namespace PadBox
                     else
                     {
                         l = new Looper();
-                        if (midiOut == null) { Status("Elige una «Salida música» abajo para oír el ritmo."); break; }
-                        if (!l.Start(midiOut, a.Value, ch, a.Num)) { Status("Ritmo desconocido: " + a.Value); break; }
+                        if (midiOut == null) { Status(L.T("Elige una «Salida música» abajo para oír el ritmo.")); break; }
+                        if (!l.Start(midiOut, a.Value, ch, a.Num)) { Status(L.T("Ritmo desconocido: ") + a.Value); break; }
                         loops[i] = l; toggles[i] = true;
                     }
                     pads[i].On = toggles[i];
@@ -2564,8 +2936,8 @@ namespace PadBox
         void PlaySound(int i, PadAction a, int vel)
         {
             var path = Sounds.Resolve(a.Value);
-            if (path.Length == 0) { Status("Pad " + (i + 1) + ": no tiene sonido. Arrastra un archivo de audio sobre él o elígelo en el editor."); return; }
-            if (!File.Exists(path)) { Status("No encuentro el sonido «" + a.Value + "»."); return; }
+            if (path.Length == 0) { Status("Pad " + (i + 1) + L.T(": no tiene sonido. Arrastra un archivo de audio sobre él o elígelo en el editor.")); return; }
+            if (!File.Exists(path)) { Status(L.T("No encuentro el sonido «") + a.Value + L.T("».")); return; }
             int volume = a.Vel > 0 ? a.Vel * 1000 / 127 : Math.Max(150, vel * 1000 / 127);
             // WAV de 16 bits a 44,1 kHz: mezclador propio (bucles sincronizados, poca demora)
             var clip = mixer.Ok ? GetClip(path) : null;
@@ -2584,7 +2956,7 @@ namespace PadBox
                 if (a.Num == 1) heldSounds.Add(i);
                 return;
             }
-            if (!samples.Load(i, path)) { Status("No se pudo abrir «" + Path.GetFileName(path) + "»: " + samples.LastError); return; }
+            if (!samples.Load(i, path)) { Status(L.T("No se pudo abrir «") + Path.GetFileName(path) + L.T("»: ") + samples.LastError); return; }
             if (a.Num == 2)
             {
                 toggles[i] = !toggles[i];
@@ -2622,7 +2994,7 @@ namespace PadBox
         void AssignSounds(int pad, List<string> files)
         {
             if (files.Count == 0) return;
-            if (pad < PadLayout.FixedPads) { Status("Los pads 1, 2 y 3 son fijos (modo y presets). Suelta el sonido en los pads 4 a 16."); return; }
+            if (pad < PadLayout.FixedPads) { Status(L.T("Los pads 1, 2 y 3 son fijos (modo y presets). Suelta el sonido en los pads 4 a 16.")); return; }
             int assigned = 0;
             foreach (var f in files)
             {
@@ -2635,17 +3007,17 @@ namespace PadBox
                     a.Num = 0; a.Vel = 0;
                     assigned++;
                 }
-                catch (Exception ex) { Status("No se pudo copiar «" + Path.GetFileName(f) + "»: " + ex.Message); break; }
+                catch (Exception ex) { Status(L.T("No se pudo copiar «") + Path.GetFileName(f) + L.T("»: ") + ex.Message); break; }
             }
             if (assigned == 0) return;
             sel = pad;
             PreloadSounds();
             RefreshPads(); LoadEditor(); UpdatePadColors(); ScheduleSave();
-            Status(assigned == 1 ? "Sonido asignado al pad " + (pad + 1) + "." : assigned + " sonidos asignados desde el pad " + (pad + 1) + ".");
+            Status(assigned == 1 ? L.T("Sonido asignado al pad ") + (pad + 1) + "." : assigned + L.T(" sonidos asignados desde el pad ") + (pad + 1) + ".");
         }
         void PickSound()
         {
-            using (var d = new OpenFileDialog { Filter = Sounds.Filter, Title = "Elige un sonido para el pad " + (sel + 1), Multiselect = true })
+            using (var d = new OpenFileDialog { Filter = Sounds.Filter, Title = L.T("Elige un sonido para el pad ") + (sel + 1), Multiselect = true })
                 if (d.ShowDialog(this) == DialogResult.OK) AssignSounds(sel, d.FileNames.ToList());
         }
 
@@ -2669,7 +3041,7 @@ namespace PadBox
 
         void Out(int st, int d1, int d2)
         {
-            if (midiOut == null) { Status("Elige una «Salida música» abajo para oír los pads."); return; }
+            if (midiOut == null) { Status(L.T("Elige una «Salida música» abajo para oír los pads.")); return; }
             midiOut.Send(st, d1, d2);
         }
 
@@ -2719,11 +3091,11 @@ namespace PadBox
         }
         void ShowOsd()
         {
-            string mode = cfg.OfficeMode ? "OFICINA" : "MÚSICA";
+            string mode = cfg.OfficeMode ? L.T("OFICINA") : L.T("MÚSICA");
             string tip = "PadBox · " + mode + " · " + Cur.Name;
             tray.Text = tip.Substring(0, Math.Min(63, tip.Length));
             if (cfg.HideOsd) return;
-            osd.ShowInfo(mode, Cur.Name, Cur.Icon, Accent, (Idx + 1) + " de " + Presets.Count);
+            osd.ShowInfo(mode, Cur.Name, Cur.Icon, Accent, (Idx + 1) + L.T(" de ") + Presets.Count);
         }
 
         string Prompt(string title, string def)
@@ -2731,8 +3103,8 @@ namespace PadBox
             using (var f = new Form { Text = title, FormBorderStyle = FormBorderStyle.FixedDialog, StartPosition = FormStartPosition.CenterParent, MaximizeBox = false, MinimizeBox = false, ShowInTaskbar = false, AutoScaleMode = AutoScaleMode.Dpi, AutoScaleDimensions = new SizeF(96f, 96f), ClientSize = new Size(340, 96), Font = Theme.Base })
             {
                 var t = new TextBox { Left = 12, Top = 14, Width = 316, Text = def };
-                var ok = new Button { Text = "Aceptar", Left = 172, Top = 54, Width = 75, DialogResult = DialogResult.OK };
-                var cancel = new Button { Text = "Cancelar", Left = 253, Top = 54, Width = 75, DialogResult = DialogResult.Cancel };
+                var ok = new Button { Text = L.T("Aceptar"), Left = 172, Top = 54, Width = 75, DialogResult = DialogResult.OK };
+                var cancel = new Button { Text = L.T("Cancelar"), Left = 253, Top = 54, Width = 75, DialogResult = DialogResult.Cancel };
                 f.Controls.AddRange(new Control[] { t, ok, cancel });
                 f.AcceptButton = ok; f.CancelButton = cancel;
                 return f.ShowDialog(this) == DialogResult.OK && t.Text.Trim().Length > 0 ? t.Text.Trim() : null;
@@ -2740,7 +3112,7 @@ namespace PadBox
         }
         void NewPreset(bool copy)
         {
-            var name = Prompt(copy ? "Duplicar preset" : "Nuevo preset", copy ? Cur.Name + " (copia)" : "Mi preset");
+            var name = Prompt(copy ? L.T("Duplicar preset") : L.T("Nuevo preset"), copy ? Cur.Name + L.T(" (copia)") : L.T("Mi preset"));
             if (name == null) return;
             var p = new Preset { Name = name, Icon = copy ? Cur.Icon : "star", Program = copy ? Cur.Program : 0, Program2 = copy ? Cur.Program2 : 0,
                 Pads = copy ? Cur.Pads.Select(a => a.Clone()).ToList() : Enumerable.Range(0, PadLayout.Actions).Select(x => new PadAction()).ToList() };
@@ -2749,22 +3121,22 @@ namespace PadBox
         }
         void RenamePreset()
         {
-            var name = Prompt("Renombrar preset", Cur.Name);
+            var name = Prompt(L.T("Renombrar preset"), Cur.Name);
             if (name == null) return;
             Cur.Name = name;
             RefreshAll(); ScheduleSave();
         }
         void DeletePreset()
         {
-            if (Presets.Count <= 1) { MessageBox.Show(this, "Cada modo necesita al menos un preset.", "PadBox"); return; }
-            if (MessageBox.Show(this, "¿Borrar el preset «" + Cur.Name + "»?", "PadBox", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+            if (Presets.Count <= 1) { MessageBox.Show(this, L.T("Cada modo necesita al menos un preset."), "PadBox"); return; }
+            if (MessageBox.Show(this, L.T("¿Borrar el preset «") + Cur.Name + L.T("»?"), "PadBox", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
             int i = Idx;
             Presets.RemoveAt(i);
             SelectPreset(Math.Max(0, i - 1));
         }
         void ResetPresets()
         {
-            if (MessageBox.Show(this, "¿Restaurar los presets originales de los dos modos? Se pierden los cambios que hiciste en los presets (la detección de pads se conserva).", "PadBox", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+            if (MessageBox.Show(this, L.T("¿Restaurar los presets originales de los dos modos? Se pierden los cambios que hiciste en los presets (la detección de pads se conserva)."), "PadBox", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
             ReleaseAll();
             cfg.Music = Defaults.Music(); cfg.Office = Defaults.Office();
             cfg.MusicIdx = 0; cfg.OfficeIdx = 0;
@@ -2826,12 +3198,12 @@ namespace PadBox
         // ---------- detectar pads ----------
         void ToggleDetect()
         {
-            if (detectIdx >= 0) { detectIdx = -1; btnDetect.Text = "Detectar pads"; Status("Detección cancelada."); RefreshPads(); return; }
-            if (midiIn == null) { MessageBox.Show(this, "Primero conecta tu controlador (mira la barra de abajo).", "PadBox"); return; }
+            if (detectIdx >= 0) { detectIdx = -1; btnDetect.Text = L.T("Detectar pads"); Status(L.T("Detección cancelada.")); RefreshPads(); return; }
+            if (midiIn == null) { MessageBox.Show(this, L.T("Primero conecta tu controlador (mira la barra de abajo)."), "PadBox"); return; }
             ReleaseAll();
             detectIdx = 0;
-            btnDetect.Text = "Cancelar";
-            Status("DETECTAR: toca el pad físico que quieres como Pad 1 (arriba a la izquierda en pantalla).");
+            btnDetect.Text = L.T("Cancelar");
+            Status(L.T("DETECTAR: toca el pad físico que quieres como Pad 1 (arriba a la izquierda en pantalla)."));
             RefreshPads();
         }
         void Learn(int note)
@@ -2842,14 +3214,14 @@ namespace PadBox
             if (detectIdx >= PadCount)
             {
                 detectIdx = -1;
-                btnDetect.Text = "Detectar pads";
-                Status("¡Listo! Los " + PadCount + " pads quedaron detectados.");
+                btnDetect.Text = L.T("Detectar pads");
+                Status(L.T("¡Listo! Los ") + PadCount + L.T(" pads quedaron detectados."));
                 if (cfg.PadNotes == null) cfg.PadNotes = new Dictionary<string, List<int>>();
                 cfg.PadNotes[profile.Id] = cfg.InNotes.ToList();
                 ScheduleSave();
                 UpdatePadColors();
             }
-            else Status("DETECTAR: ahora toca el pad físico para el Pad " + (detectIdx + 1) + ".");
+            else Status(L.T("DETECTAR: ahora toca el pad físico para el Pad ") + (detectIdx + 1) + ".");
             RefreshPads();
         }
 
@@ -2888,8 +3260,8 @@ namespace PadBox
                 if (i < PadLayout.FixedPads)
                 {
                     p.Fixed = true; p.Accent = i == 0 ? Accent : Theme.Fixed; p.On = false;
-                    p.Title = i == 0 ? "Cambiar modo" : i == 1 ? "Preset anterior" : "Preset siguiente";
-                    p.Sub = i == 0 ? (cfg.OfficeMode ? "→ Música" : "→ Oficina") : i == 1 ? "← " + Presets[PrevIdx].Name : "→ " + Presets[NextIdx].Name;
+                    p.Title = i == 0 ? L.T("Cambiar modo") : i == 1 ? L.T("Preset anterior") : L.T("Preset siguiente");
+                    p.Sub = i == 0 ? (cfg.OfficeMode ? L.T("→ Música") : L.T("→ Oficina")) : i == 1 ? "← " + Presets[PrevIdx].Name : "→ " + Presets[NextIdx].Name;
                 }
                 else
                 {
@@ -2906,24 +3278,24 @@ namespace PadBox
             switch (a.Type)
             {
                 case "keys": return Shortcut.Pretty(a.Value);
-                case "text": return "Escribe: " + a.Value.Replace("\n", " ");
+                case "text": return L.T("Escribe: ") + a.Value.Replace("\n", " ");
                 case "run":
                     var v = a.Value.Trim();
                     if (v.StartsWith("http", StringComparison.OrdinalIgnoreCase)) v = v.Replace("https://", "").Replace("http://", "").Replace("www.", "");
                     else { try { v = Path.GetFileName(v); } catch { } }
-                    return "Abre: " + v;
-                case "note": return Mus.NoteName(a.Num) + " · canal " + a.Ch;
-                case "chord": return "Acorde " + Mus.ChordName(a.Chord) + " · canal " + a.Ch;
+                    return L.T("Abre: ") + v;
+                case "note": return Mus.NoteName(a.Num) + L.T(" · canal ") + a.Ch;
+                case "chord": return L.T("Acorde ") + Mus.ChordName(a.Chord) + L.T(" · canal ") + a.Ch;
                 case "loop": return Looper.DisplayName(a.Value) + " · " + a.Num + " BPM · on/off";
                 case "seq":
                     var seq = Mus.ParseSeq(a.Value);
-                    return seq == null ? "Notas no válidas" : "Melodía · " + seq.Count + " notas · toca para avanzar";
-                case "cc": return "CC " + a.Num + " · canal " + a.Ch;
-                case "toggle": return "CC " + a.Num + " on/off · canal " + a.Ch;
-                case "pc": return "Programa " + a.Num + " · canal " + a.Ch;
+                    return seq == null ? L.T("Notas no válidas") : L.T("Melodía · ") + seq.Count + L.T(" notas · toca para avanzar");
+                case "cc": return "CC " + a.Num + L.T(" · canal ") + a.Ch;
+                case "toggle": return "CC " + a.Num + L.T(" on/off · canal ") + a.Ch;
+                case "pc": return L.T("Programa ") + a.Num + L.T(" · canal ") + a.Ch;
                 case "sound":
-                    if (string.IsNullOrWhiteSpace(a.Value)) return "Sin sonido: arrastra un archivo aquí";
-                    return (a.Num == 1 ? "Mantener · " : a.Num == 2 ? "Bucle · " : "") + Path.GetFileName(a.Value);
+                    if (string.IsNullOrWhiteSpace(a.Value)) return L.T("Sin sonido: arrastra un archivo aquí");
+                    return (a.Num == 1 ? L.T("Mantener · ") : a.Num == 2 ? L.T("Bucle · ") : "") + Path.GetFileName(a.Value);
             }
             return "—";
         }
@@ -2941,10 +3313,10 @@ namespace PadBox
             txtName.Enabled = !fixedPad;
             if (fixedPad)
             {
-                txtName.Text = sel == 0 ? "Cambiar modo" : sel == 1 ? "Preset anterior" : "Preset siguiente";
+                txtName.Text = sel == 0 ? L.T("Cambiar modo") : sel == 1 ? L.T("Preset anterior") : L.T("Preset siguiente");
                 lblFixed.Text = sel == 0
-                    ? "Este pad alterna entre el modo MÚSICA y el modo OFICINA.\n\nCada modo guarda sus propios presets y recuerda cuál usaste por última vez."
-                    : "Este pad pasa al " + (sel == 1 ? "preset anterior" : "preset siguiente") + " del modo actual:\n\n" + string.Join("\n", Presets.Select((p, k) => (k == Idx ? "▶ " : "    ") + p.Name));
+                    ? L.T("Este pad alterna entre el modo MÚSICA y el modo OFICINA.\n\nCada modo guarda sus propios presets y recuerda cuál usaste por última vez.")
+                    : L.T("Este pad pasa al ") + (sel == 1 ? L.T("preset anterior") : L.T("preset siguiente")) + L.T(" del modo actual:\n\n") + string.Join("\n", Presets.Select((p, k) => (k == Idx ? "▶ " : "    ") + p.Name));
                 loading = false;
                 return;
             }
@@ -2977,21 +3349,21 @@ namespace PadBox
             grpMidi.Visible = MidiTypes.Contains(t);
             grpSound.Visible = t == "sound";
             btnBrowse.Visible = t == "run";
-            lblTextCap.Text = t == "seq" ? "Notas en orden" : "Texto, programa o página web";
+            lblTextCap.Text = t == "seq" ? L.T("Notas en orden") : L.T("Texto, programa o página web");
             chkScoop.Visible = t == "seq";
             lblHelpText.Top = t == "run" ? 96 : t == "seq" ? 100 : 58;
             lblHelpText.Height = t == "seq" ? 100 : 140;
-            lblHelpText.Text = t == "run" ? "Puede ser un programa (.exe), un acceso directo, una carpeta o una página web (https://…)."
-                : t == "seq" ? "Cada toque suena la siguiente nota; si paras " + (SelAction != null && SelAction.Num > 0 ? SelAction.Num.ToString() : "2,5") + " s vuelve a empezar.\nNotas: Do Re Mi Fa Sol La Si (o C D E…), con # o b y octava. Ej: Sol#3 La3 Do4\nUsa | para separar frases. Canal " + (SelAction != null ? SelAction.Ch : 2) + "."
-                : "El texto se escribe en la ventana activa, como si lo teclearas.";
-            lblNumCap.Text = t == "note" ? "Nota" : t == "chord" ? "Nota raíz" : t == "pc" ? "Programa" : t == "loop" ? "Tempo (BPM)" : "Número de CC";
+            lblHelpText.Text = t == "run" ? L.T("Puede ser un programa (.exe), un acceso directo, una carpeta o una página web (https://…).")
+                : t == "seq" ? L.T("Cada toque suena la siguiente nota; si paras ") + (SelAction != null && SelAction.Num > 0 ? SelAction.Num.ToString() : L.T("2,5")) + L.T(" s vuelve a empezar.\nNotas: Do Re Mi Fa Sol La Si (o C D E…), con # o b y octava. Ej: Sol#3 La3 Do4\nUsa | para separar frases. Canal ") + (SelAction != null ? SelAction.Ch : 2) + "."
+                : L.T("El texto se escribe en la ventana activa, como si lo teclearas.");
+            lblNumCap.Text = t == "note" ? L.T("Nota") : t == "chord" ? L.T("Nota raíz") : t == "pc" ? L.T("Programa") : t == "loop" ? L.T("Tempo (BPM)") : L.T("Número de CC");
             lblNote.Visible = isNote;
             lblNote.Text = Mus.NoteName((int)numNum.Value);
             cboChord.Visible = t == "chord";
             cboPattern.Visible = t == "loop";
             lblChordCap.Visible = t == "chord" || t == "loop";
-            lblChordCap.Text = t == "loop" ? "Ritmo" : "Acorde";
-            lblVelCap.Text = isNote ? "Velocidad (0 = según golpe)" : "Valor (0 = 127)";
+            lblChordCap.Text = t == "loop" ? L.T("Ritmo") : L.T("Acorde");
+            lblVelCap.Text = isNote ? L.T("Velocidad (0 = según golpe)") : L.T("Valor (0 = 127)");
             lblVelCap.Visible = numVel.Visible = t != "pc" && t != "loop";
             Validate();
         }
@@ -3067,7 +3439,7 @@ namespace PadBox
 
         void Browse()
         {
-            using (var d = new OpenFileDialog { Filter = "Programas y accesos directos|*.exe;*.lnk;*.bat;*.cmd|Todos los archivos|*.*", Title = "Elige el programa a abrir" })
+            using (var d = new OpenFileDialog { Filter = L.T("Programas y accesos directos|*.exe;*.lnk;*.bat;*.cmd|Todos los archivos|*.*"), Title = L.T("Elige el programa a abrir") })
                 if (d.ShowDialog(this) == DialogResult.OK) txtValue.Text = d.FileName;
         }
 
@@ -3077,7 +3449,7 @@ namespace PadBox
             if (a == null) return;
             if (a.Type == "keys" || a.Type == "text")
             {
-                Status("Los atajos y el texto se envían a la ventana activa: abre el programa y toca el pad.");
+                Status(L.T("Los atajos y el texto se envían a la ventana activa: abre el programa y toca el pad."));
                 return;
             }
             int i = sel;
@@ -3091,7 +3463,7 @@ namespace PadBox
         void StartRec()
         {
             recording = true;
-            btnRec.Text = "Presiona…";
+            btnRec.Text = L.T("Presiona…");
             btnRec.BackColor = Theme.Warn;
             btnRec.ForeColor = Color.Black;
         }
@@ -3099,7 +3471,7 @@ namespace PadBox
         {
             if (btnRec == null) return;
             recording = false;
-            btnRec.Text = "Grabar";
+            btnRec.Text = L.T("Grabar");
             btnRec.BackColor = Theme.Field;
             btnRec.ForeColor = Theme.Text;
         }
@@ -3133,7 +3505,7 @@ namespace PadBox
     {
         [DllImport("user32.dll")] static extern bool SetProcessDPIAware();
 
-        public const string Version = "1.0.0";
+        public const string Version = "1.1.0";
         public static bool TestMode;   // capturas de prueba: no tocar las luces del pad
 
         // Diagnóstico: PadBox.exe --lights-test archivo.txt (solo lee; reescribe el color del pad 1 con el mismo valor)
@@ -3175,6 +3547,8 @@ namespace PadBox
         static void Main(string[] args)
         {
             try { SetProcessDPIAware(); } catch { }
+            // El idioma se fija aquí y no en Run: al compilar Run, .NET ya carga tablas como la de íconos (con sus textos)
+            L.Init(args, Path.Combine(AppPaths.Data, "padbox-config.json"));
             Run(args);
         }
 
@@ -3185,7 +3559,7 @@ namespace PadBox
             Application.SetCompatibleTextRenderingDefault(false);
             var errLog = Path.Combine(AppPaths.Data, "padbox-error.log");
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-            Application.ThreadException += (s, e) => { File.AppendAllText(errLog, DateTime.Now + " " + e.Exception + "\r\n"); MessageBox.Show("Ocurrió un error: " + e.Exception.Message, "PadBox"); };
+            Application.ThreadException += (s, e) => { File.AppendAllText(errLog, DateTime.Now + " " + e.Exception + "\r\n"); MessageBox.Show(L.T("Ocurrió un error: ") + e.Exception.Message, "PadBox"); };
             AppDomain.CurrentDomain.UnhandledException += (s, e) => File.AppendAllText(errLog, DateTime.Now + " " + e.ExceptionObject + "\r\n");
 
             TestMode = args.Any(a => a.StartsWith("--shot"));
@@ -3229,10 +3603,10 @@ namespace PadBox
             {
                 var osd = new Osd();
                 var samples = new[] {
-                    osd.Render("OFICINA", "Escritorio", "desktop", Theme.Office, "1 de 6"),
-                    osd.Render("MÚSICA", "Cumbia", "cumbia", Theme.Music, "2 de 9"),
-                    osd.Render("OFICINA", "OBS", "obs", Theme.Office, "3 de 6"),
-                    osd.Render("MÚSICA", "Batería GM", "drum", Theme.Music, "1 de 9") };
+                    osd.Render(L.T("OFICINA"), L.T("Escritorio"), "desktop", Theme.Office, "1 de 6"),
+                    osd.Render(L.T("MÚSICA"), "Cumbia", "cumbia", Theme.Music, "2 de 9"),
+                    osd.Render(L.T("OFICINA"), "OBS", "obs", Theme.Office, "3 de 6"),
+                    osd.Render(L.T("MÚSICA"), L.T("Batería GM"), "drum", Theme.Music, "1 de 9") };
                 int cell = 64, cols = 10, rows = (Icons.All.Count + cols - 1) / cols;
                 int w = Math.Max(samples.Max(b => b.Width), cols * (cell + 12)) + 24;
                 int h = samples.Sum(b => b.Height + 12) + rows * (cell + 30) + 24;
@@ -3268,7 +3642,7 @@ namespace PadBox
             bool created;
             using (var mutex = new System.Threading.Mutex(true, "PadBox_SingleInstance", out created))
             {
-                if (!created) { MessageBox.Show("PadBox ya está abierto. Búscalo junto al reloj de Windows.", "PadBox"); return; }
+                if (!created) { MessageBox.Show(L.T("PadBox ya está abierto. Búscalo junto al reloj de Windows."), "PadBox"); return; }
                 bool atLogin = false;   // versión de la Store: Windows la abrió al iniciar sesión
                 if (AppPaths.Packaged) { try { atLogin = PackagedStartup.LaunchedAtStartup(); } catch (Exception) { } }
                 var main = new MainForm(args.Contains("--min") || atLogin);

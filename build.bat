@@ -3,7 +3,7 @@ rem Compila PadBox con el compilador de C# que trae Windows (.NET Framework 4.8)
 rem originales del preset "Drum Pad EDM" y arma dist\PadBox-<version>.zip listo para publicar.
 setlocal
 set CSC=%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe
-set VER=1.0.0
+set VER=1.1.0
 set OUT=%~dp0dist\PadBox-%VER%
 
 if exist "%OUT%" rmdir /s /q "%OUT%"

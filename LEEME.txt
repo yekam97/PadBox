@@ -1,5 +1,6 @@
-PadBox 1.0.0
+PadBox 1.1.0
 ============
+(English below)
 
 1. Conecta tu controlador MIDI por USB.
 2. Abre PadBox.exe. No necesita instalación.
@@ -21,5 +22,19 @@ PadBox todavía no tiene firma digital.
 Tu configuración se guarda en padbox-config.json, en esta misma carpeta.
 
 PadBox no está afiliado a ninguna de las marcas que menciona. Más detalles en AVISOS.txt.
+El idioma (español o inglés) se cambia abajo, en «Idioma».
+
+----------------------------------------------------------------
+English
+
+1. Connect your MIDI controller via USB.
+2. Open PadBox.exe. No installation needed.
+3. If your model is not recognized, choose it under "Controller" and press "Detect pads".
+
+Pad 1: switch between MUSIC and OFFICE · Pad 2: previous preset · Pad 3: next preset
+Click a pad on screen to change what it does. Drag mp3 or wav files onto a pad to assign a sound.
+The app follows your Windows language; change it under "Language" at the bottom.
+PadBox is not affiliated with any brand it mentions. See AVISOS.txt (legal notices, in Spanish).
+Microsoft Store version: https://apps.microsoft.com/detail/9N7H11FB7SL7
 
 Código, ayuda y novedades: https://github.com/yekam97/padbox

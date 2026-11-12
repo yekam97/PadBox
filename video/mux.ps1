@@ -1,6 +1,6 @@
 # Junta out\video.mp4 (imagen) y out\musica.wav (sonido) en out\PadBox-promo.mp4 (H.264 + AAC, 1080p)
 # usando el editor de video que trae Windows (Windows.Media.Editing). No necesita ffmpeg.
-param([string]$Dir = (Join-Path $PSScriptRoot 'out'), [string]$Name = 'PadBox-promo.mp4')
+param([string]$Dir = (Join-Path $PSScriptRoot 'out'), [string]$Name = 'PadBox-promo.mp4', [int]$Bitrate = 12000000)
 
 Add-Type -AssemblyName System.Runtime.WindowsRuntime
 $null = [Windows.Storage.StorageFile, Windows.Storage, ContentType = WindowsRuntime]
@@ -32,7 +32,7 @@ $comp = New-Object Windows.Media.Editing.MediaComposition
 $folder = Await ([Windows.Storage.StorageFolder]::GetFolderFromPathAsync($Dir)) ([Windows.Storage.StorageFolder])
 $out = Await ($folder.CreateFileAsync($Name, [Windows.Storage.CreationCollisionOption]::ReplaceExisting)) ([Windows.Storage.StorageFile])
 $profile = [Windows.Media.MediaProperties.MediaEncodingProfile]::CreateMp4([Windows.Media.MediaProperties.VideoEncodingQuality]::HD1080p)
-$profile.Video.Bitrate = 12000000
+$profile.Video.Bitrate = $Bitrate   # la Store acepta hasta 10 MB por archivo al subirlo desde aquí: usa -Bitrate 2000000
 $profile.Video.FrameRate.Numerator = 30
 $profile.Video.FrameRate.Denominator = 1
 

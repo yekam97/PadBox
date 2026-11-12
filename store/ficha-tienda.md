@@ -33,7 +33,7 @@ Convierte tu controlador MIDI de pads en un instrumento con ritmos y sonidos pro
 
 **Descripción:**
 
-PadBox convierte cualquier controlador MIDI de pads en dos herramientas en una: un instrumento para tocar y crear, y un panel de atajos para trabajar más rápido en Windows.
+PadBox convierte tu controlador MIDI de pads en dos herramientas en una: un instrumento para tocar y crear, y un panel de atajos para trabajar más rápido en Windows.
 
 MODO MÚSICA
 • 13 presets: batería rock, cumbia, cumbia villera, vallenato, cumbia rebajada, acordeón, piano, saxofón, guitarra blues, dubstep y más, cada uno con su propio ritmo.
@@ -53,15 +53,17 @@ MODO OFICINA
 CONTROLADORES
 • Probado con el M-VAVE SMC-PAD Pocket, con colores RGB en los pads según el preset.
 • Incluye perfiles para otros modelos de M-VAVE, Akai (MPD218, LPD8, MPK Mini) y Novation Launchpad, que todavía no se han probado con el aparato real.
-• Cualquier otro controlador MIDI de 8 o 16 pads: con «Detectar pads», PadBox aprende cuál es cada pad.
+• Otros controladores MIDI de 8 o 16 pads: con «Detectar pads», PadBox aprende cuál es cada pad.
+
+La app está en español e inglés: se abre en el idioma de Windows y puedes cambiarlo en «Idioma».
 
 Requiere un controlador MIDI USB. PadBox no recoge datos ni necesita internet.
 
 PadBox es una app independiente: no está afiliada a M-VAVE, Akai, Novation, OBS, Adobe ni a otras marcas mencionadas, ni cuenta con su respaldo. Sus nombres se usan solo para indicar compatibilidad y pertenecen a sus dueños.
 
-**Novedades de esta versión:**
+**Novedades de esta versión (1.1.0):**
 
-Primera versión de PadBox en la Microsoft Store.
+PadBox ahora también está en inglés: se abre en el idioma de Windows y puedes cambiarlo en «Idioma». Nuevo tráiler.
 
 **Características del producto (una por línea, hasta 20):**
 
@@ -75,18 +77,72 @@ Primera versión de PadBox en la Microsoft Store.
 - Aviso en pantalla al cambiar de modo o de preset
 - Envía notas a otros programas por un puerto MIDI virtual
 - Sin cuentas, sin anuncios y sin conexión a internet
+- Interfaz en español e inglés
 
 **Palabras clave (hasta 7, sin nombres de otros productos):** controlador MIDI, drum pad, pads, cumbia, atajos, macro, teclas rápidas
 
-**Capturas de pantalla:** sube las 3 de `PadBox\docs\` (captura-primera-vez.png, captura-oficina.png, captura-edm.png).
+**Capturas de pantalla:** las 4 de `PadBox\docs\` (captura-primera-vez.png, captura-oficina.png, captura-edm.png, captura-obs.png).
 
-**Video (opcional, «Tráiler»):** `PadBox\video\out\PadBox-promo.mp4` (30 s, 1080p).
+**Tráiler:** `PadBox\video\out\PadBox-trailer-es.mp4` (30 s, 1080p, liviano para subirlo), miniatura `store\trailer\thumb-es.png`. Portada «16:9 Super hero art» (sin el nombre de la app): `store\trailer\hero.png`.
 
-## 4. Ficha en inglés (opcional, si agregas el idioma en-US)
+## 4. Ficha en inglés (idioma en-us)
 
-**Short description:** Turn your MIDI pad controller into an instrument with its own rhythms and sounds, and into a shortcut panel for Windows and your programs. Pad 1 switches between Music and Office; pads 2 and 3 switch presets.
+**Product name:** PadBox
 
-**Description:** PadBox turns a MIDI pad controller into two tools in one: an instrument to play and create, and a shortcut panel to work faster in Windows. Music mode includes 13 presets with looped rhythms, a set of original sounds with synced loops, and your own mp3/wav sounds (use only sounds you have the right to use). It does not include third-party songs. Office mode gives one-touch shortcuts for Windows and browsers, plus presets with common shortcuts for programs such as OBS, Adobe Photoshop, Adobe Illustrator and Microsoft Word/Excel, color-coded by function. Tested on the M-VAVE SMC-PAD Pocket (with RGB pad colors). It also includes profiles for other M-VAVE, Akai and Novation models that have not yet been tested on real hardware, and pad detection for other 8 or 16-pad MIDI controllers. Requires a USB MIDI controller. No data collection, no internet needed. The app's interface is in Spanish. PadBox is independent and is not affiliated with or endorsed by M-VAVE, Akai, Novation, OBS, Adobe or other brands mentioned; their names are used only to indicate compatibility and belong to their owners.
+**Short description:** Turn your MIDI pad controller into an instrument with its own beats and sounds, and into a shortcut panel for Windows and your programs. Pad 1 switches between Music and Office; pads 2 and 3 switch presets.
+
+**Description:**
+
+PadBox turns your MIDI pad controller into two tools in one: an instrument to play and create, and a shortcut panel to work faster in Windows.
+
+MUSIC MODE
+• 13 presets: rock drums, cumbia, cumbia villera, vallenato, slowed cumbia, accordion, piano, saxophone, blues guitar, dubstep and more, each with its own beat.
+• Drum Pad EDM: 13 original sounds made for PadBox, with loops that come in right on the beat.
+• Your own sounds: drag an mp3 or wav onto any pad. Only use sounds you have the right to use.
+• Step-by-step melodies: each press plays the next note.
+• Can send its notes to other music programs through a virtual MIDI port.
+
+PadBox does not include third-party songs.
+
+OFFICE MODE
+• One-touch shortcuts for Windows and your browser, plus presets with common shortcuts for programs such as OBS, Adobe Photoshop, Adobe Illustrator and Microsoft Word/Excel.
+• Music and volume controls.
+• Each group of functions has its own color so you can find it at a glance.
+• Assign any shortcut, text, program or website to any pad.
+
+CONTROLLERS
+• Tested with the M-VAVE SMC-PAD Pocket, with RGB pad colors that follow the preset.
+• Includes profiles for other M-VAVE models, Akai (MPD218, LPD8, MPK Mini) and Novation Launchpad that have not been tested on real hardware yet.
+• Other MIDI controllers with 8 or 16 pads: with "Detect pads", PadBox learns which pad is which.
+
+The app is in English and Spanish: it opens in your Windows language, and you can change it under "Language".
+
+Requires a USB MIDI controller. PadBox collects no data and needs no internet connection.
+
+PadBox is an independent app: it is not affiliated with or endorsed by M-VAVE, Akai, Novation, OBS, Adobe or any other brand mentioned. Their names are used only to indicate compatibility and belong to their owners.
+
+**What's new in this version:** PadBox is now available in English: it opens in your Windows language and you can change it under "Language". New trailer.
+
+**Product features:**
+
+- Two modes on one pad: Music and Office
+- 13 music presets with looped beats
+- Original EDM sounds with synced loops
+- Load your own mp3 and wav sounds
+- Shortcuts for Windows and your programs
+- Pad colors that follow the preset (SMC-PAD Pocket; Launchpad untested)
+- Designed for MIDI controllers with 8 or 16 pads
+- On-screen notice when you switch mode or preset
+- Sends notes to other programs through a virtual MIDI port
+- No accounts, no ads and no internet connection
+
+**Keywords (up to 7, no other product names):** MIDI controller, drum pad, MIDI pads, macro pad, shortcuts, hotkeys, beat pad
+
+**Copyright and trademark info:** © 2026 yekam97 (GonStudio). PadBox is not affiliated with the brands it mentions.
+
+**Developed by:** GonStudio
+
+**Screenshots:** the 4 in `PadBox\docs\en\`. **Trailer:** `PadBox\video\out\en\PadBox-trailer-en.mp4`, thumbnail `store\trailer\thumb-en.png`, hero art `store\trailer\hero.png`.
 
 ## 5. Paquete
 
