@@ -1,4 +1,4 @@
-PadBox 1.1.0
+PadBox 1.2.0
 ============
 (English below)
 

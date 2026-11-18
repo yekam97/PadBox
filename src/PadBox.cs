@@ -364,6 +364,36 @@ namespace PadBox
             {"Ocurrió un error: ", "An error occurred: "},
             {"PadBox ya está abierto. Búscalo junto al reloj de Windows.", "PadBox is already open. Look for it next to the Windows clock."},
             {"Idioma:", "Language:"},
+            {"Guía rápida", "Quick guide"},
+            {"Omitir guía", "Skip guide"},
+            {"Siguiente", "Next"},
+            {"Empezar", "Get started"},
+            {"Paso ", "Step "},
+            {"Te damos la bienvenida", "Welcome to PadBox"},
+            {"Tres pads para moverte", "Three pads to get around"},
+            {"Modo Música: a tocar", "Music mode: start playing"},
+            {"Modo Oficina: atajos con un toque", "Office mode: one-touch shortcuts"},
+            {"Hazlo a tu manera", "Make it your own"},
+            {"PadBox convierte tu controlador de pads en un instrumento y en un panel de atajos para Windows.\n\nEsta guía dura un minuto y puedes probar cada paso con tu controlador.", "PadBox turns your pad controller into an instrument and a shortcut panel for Windows.\n\nThis guide takes one minute, and you can try each step on your controller."},
+            {"Pad 1: cambia entre Música y Oficina.\nPad 2: va al preset anterior.\nPad 3: va al preset siguiente.\n\nUn preset es un grupo de sonidos o de atajos. Al cambiar, aparece un aviso con su nombre.", "Pad 1: switches between Music and Office.\nPad 2: goes to the previous preset.\nPad 3: goes to the next preset.\n\nA preset is a set of sounds or shortcuts. When you switch, a notice shows its name."},
+            {"Cada preset es un instrumento distinto.\n\nEl pad 4 enciende o apaga el ritmo, y los demás pads tocan notas, acordes o sonidos.", "Each preset is a different instrument.\n\nPad 4 starts or stops the beat, and the other pads play notes, chords or sounds."},
+            {"Cada pad hace una tarea: copiar, pegar, subir el volumen, cambiar de ventana…\n\nAbre tu programa y toca el pad. Los colores agrupan las funciones parecidas.", "Each pad does one job: copy, paste, turn up the volume, switch windows…\n\nOpen your program and press the pad. Colors group similar functions."},
+            {"Haz clic en un pad en la pantalla para cambiar lo que hace.\n\nArrastra un mp3 o wav sobre un pad para darle ese sonido.\n\nAl cerrar la ventana, PadBox sigue funcionando junto al reloj.", "Click a pad on screen to change what it does.\n\nDrag an mp3 or wav onto a pad to give it that sound.\n\nWhen you close the window, PadBox keeps running next to the clock."},
+            {"Esta guía siempre está en el botón «?» de arriba.", "You can always reopen this guide with the “?” button at the top."},
+            {"Conecta tu controlador por USB. Si aún no lo tienes a mano, puedes seguir igual.", "Connect your controller via USB. If you don't have it handy, you can keep going."},
+            {"Cuando conectes tu controlador podrás probar este paso.", "You can try this step once your controller is connected."},
+            {". Toca cualquier pad. Si no responde, al terminar usa «Detectar pads».", ". Press any pad. If nothing happens, use “Detect pads” when you finish."},
+            {"Pruébalo: toca el pad 1 y mira el aviso que aparece en la pantalla.", "Try it: press pad 1 and watch the notice that appears on screen."},
+            {"Pruébalo: toca el pad 4 para iniciar el ritmo, y otra vez para detenerlo.", "Try it: press pad 4 to start the beat, and again to stop it."},
+            {"Pruébalo: toca un pad para ver qué hace. Durante esta guía los atajos no se ejecutan.", "Try it: press a pad to see what it does. Shortcuts don't run during this guide."},
+            {"¡Funciona! Tocaste el pad ", "It works! You pressed pad "},
+            {"¡Eso es! El pad 1 cambió de modo.", "That's it! Pad 1 switched the mode."},
+            {"¡Eso es! El pad 2 fue al preset anterior.", "That's it! Pad 2 went to the previous preset."},
+            {"¡Eso es! El pad 3 fue al preset siguiente.", "That's it! Pad 3 went to the next preset."},
+            {"Ese pad es de otro paso: prueba con el 1, el 2 o el 3.", "That pad comes later: try pad 1, 2 or 3."},
+            {"¡Eso es! El pad 4 enciende y apaga el ritmo.", "That's it! Pad 4 starts and stops the beat."},
+            {"Este pad toca: ", "This pad plays: "},
+            {"Este pad hace: ", "This pad does: "},
             {"Español", "Español"},
             {"El idioma cambiará la próxima vez que abras PadBox. Con «Restaurar presets» los presets quedan en ese idioma.", "The language will change the next time you open PadBox. Use “Restore presets” to get the presets in that language."}
         };
@@ -413,6 +443,7 @@ namespace PadBox
         public Dictionary<string, string> PadOriginals { get; set; }   // colores originales de cada banco del pad (hex), para restaurar
         public string Device { get; set; }          // perfil de controlador elegido ("auto" = según el puerto)
         public string Lang { get; set; }            // idioma: null = el de Windows, "es" o "en" (se aplica al abrir la app)
+        public bool TourDone { get; set; }          // ya vio (u omitió) la guía de bienvenida
         public Dictionary<string, List<int>> PadNotes { get; set; }   // notas detectadas por perfil de controlador
     }
 
@@ -1913,8 +1944,15 @@ namespace PadBox
     {
         string mode = "", name = "", icon = "star", count = "";
         Color accent = Theme.Music;
-        readonly Timer hold = new Timer { Interval = 1800 }, fade = new Timer { Interval = 30 };
+        readonly Timer hold = new Timer { Interval = 1800 }, fade = new Timer { Interval = 30 }, keepOnTop = new Timer { Interval = 200 };
         readonly float s = 1f;
+
+        [DllImport("user32.dll", SetLastError = true)] static extern bool SetWindowPos(IntPtr hWnd, IntPtr after, int x, int y, int cx, int cy, uint flags);
+        static readonly IntPtr HwndTopMost = new IntPtr(-1);
+        const uint NoSize = 0x1, NoMove = 0x2, NoActivate = 0x10, NoOwnerZOrder = 0x200;
+
+        // Lo pone delante de todas las ventanas, también de las que están «siempre visibles», sin quitarle el foco a la app activa
+        void RaiseAboveAll() { if (IsHandleCreated) SetWindowPos(Handle, HwndTopMost, 0, 0, 0, 0, NoMove | NoSize | NoActivate | NoOwnerZOrder); }
         const double Visible0 = 0.97;
         static readonly Font NameFont = new Font("Segoe UI Semibold", 17f);
         static readonly Font ModeFont = new Font("Segoe UI Semibold", 9f);
@@ -1931,7 +1969,8 @@ namespace PadBox
             Size = new Size((int)(340 * s), (int)(100 * s));
             SetShape();
             hold.Tick += (o, e) => { hold.Stop(); fade.Start(); };
-            fade.Tick += (o, e) => { if (Opacity > 0.12) Opacity -= 0.12; else { fade.Stop(); Hide(); Opacity = Visible0; } };
+            fade.Tick += (o, e) => { if (Opacity > 0.12) Opacity -= 0.12; else { fade.Stop(); keepOnTop.Stop(); Hide(); Opacity = Visible0; } };
+            keepOnTop.Tick += (o, e) => RaiseAboveAll();   // si otra ventana «siempre visible» se adelanta mientras se ve el aviso
         }
         void SetShape()
         {
@@ -1970,6 +2009,8 @@ namespace PadBox
             var wa = Screen.FromPoint(Cursor.Position).WorkingArea;   // en el monitor donde está el mouse
             Location = new Point(wa.Left + (wa.Width - Width) / 2, wa.Bottom - Height - (int)(48 * s));
             if (!Visible) Show();
+            RaiseAboveAll();
+            keepOnTop.Start();
             Invalidate();
             hold.Stop(); hold.Start();
         }
@@ -1987,6 +2028,241 @@ namespace PadBox
             TextRenderer.DrawText(g, mode + "  ·  " + count, ModeFont, new Point(x, (int)(19 * s)), accent);
             TextRenderer.DrawText(g, name, NameFont, new Rectangle(x, (int)(38 * s), Width - x - (int)(14 * s), (int)(42 * s)), Theme.Text,
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis);
+        }
+    }
+
+    // ---------- guía de bienvenida ----------
+    // Dibujo del controlador: resalta los pads de los que habla cada paso y se ilumina cuando tocas uno de verdad.
+    class TourArt : Control
+    {
+        int step;
+        readonly int padCount;
+        readonly float[] glow = new float[16];
+        readonly Timer decay = new Timer { Interval = 33 };
+        static readonly Color Red = Color.FromArgb(255, 59, 48), Orange = Color.FromArgb(255, 149, 0), Green = Color.FromArgb(52, 199, 89),
+            Cyan = Color.FromArgb(50, 215, 230), Blue = Color.FromArgb(10, 132, 255), Purple = Color.FromArgb(155, 92, 255), Pink = Color.FromArgb(255, 79, 163);
+        static readonly Color[] MusicPads = { Red, Orange, Orange, Orange, Orange, Blue, Blue, Blue, Blue, Green, Green, Green, Green };
+        static readonly Color[] OfficePads = { Cyan, Cyan, Orange, Orange, Purple, Purple, Pink, Green, Green, Green, Blue, Blue, Blue };
+
+        public TourArt(int pads)
+        {
+            padCount = pads;
+            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
+            decay.Tick += (s, e) =>
+            {
+                bool any = false;
+                for (int i = 0; i < glow.Length; i++) { glow[i] = Math.Max(0, glow[i] - 0.07f); any |= glow[i] > 0; }
+                if (!any) decay.Stop();
+                Invalidate();
+            };
+        }
+        public int Step { set { step = value; Invalidate(); } }
+        public void Flash(int i) { if (i >= 0 && i < glow.Length) { glow[i] = 1; decay.Start(); Invalidate(); } }
+        protected override void Dispose(bool disposing) { if (disposing) decay.Dispose(); base.Dispose(disposing); }
+
+        Color PadColor(int i)
+        {
+            var dim = Theme.Blend(Theme.Bg, Theme.Field, .75);
+            switch (step)
+            {
+                case 0: return Theme.Blend(dim, Theme.Music, .35 + (i % 4) * .12);
+                case 1: return i == 0 ? Theme.Music : i < 3 ? Theme.Fixed : dim;
+                case 2: return i < 3 ? dim : MusicPads[i - 3];
+                case 3: return i < 3 ? dim : OfficePads[i - 3];
+                default: return i == 5 ? Theme.Music : dim;
+            }
+        }
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            var g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.Clear(Theme.Panel);
+            float k = Width / 300f, cell = 48 * k, gap = 10 * k, inset = 18 * k;
+            int rows = padCount / 4;
+            float w = 4 * cell + 3 * gap, h = rows * cell + (rows - 1) * gap;
+            float x0 = (Width - w) / 2, y0 = (Height - h) / 2 - 12 * k;
+            using (var body = Theme.Round(new RectangleF(x0 - inset, y0 - inset, w + 2 * inset, h + 2 * inset), 16 * k))
+            using (var fill = new SolidBrush(Theme.Bg))
+            using (var line = new Pen(Theme.Line, 1.2f * k))
+            {
+                g.FillPath(fill, body);
+                g.DrawPath(line, body);
+            }
+            for (int i = 0; i < padCount; i++)
+            {
+                var r = new RectangleF(x0 + (i % 4) * (cell + gap), y0 + (i / 4) * (cell + gap), cell, cell);
+                var c = Theme.Blend(PadColor(i), Color.White, glow[i] * .75);
+                using (var p = Theme.Round(r, 9 * k))
+                using (var b = new SolidBrush(c))
+                    g.FillPath(b, p);
+                string num = step == 1 && i < 3 ? (i + 1).ToString() : step == 2 && i == 3 ? "4" : "";
+                if (num.Length > 0)
+                    TextRenderer.DrawText(g, num, Theme.Title, Rectangle.Round(r), step == 1 && i > 0 ? Color.FromArgb(46, 38, 0) : Color.White,
+                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine);
+            }
+            if (step == 4)   // flecha del mouse sobre el pad que se va a editar
+            {
+                float px = x0 + (cell + gap) + cell * .55f, py = y0 + (cell + gap) + cell * .5f, u = 2.1f * k;
+                var pts = new[] { new PointF(px, py), new PointF(px, py + 15 * u), new PointF(px + 4 * u, py + 11.5f * u), new PointF(px + 6.5f * u, py + 17 * u),
+                    new PointF(px + 9 * u, py + 16 * u), new PointF(px + 6.5f * u, py + 10.5f * u), new PointF(px + 11 * u, py + 10.5f * u) };
+                using (var b = new SolidBrush(Color.White)) g.FillPolygon(b, pts);
+                using (var p = new Pen(Theme.Bg, 1.3f * k)) g.DrawPolygon(p, pts);
+            }
+            float dot = 8 * k, sp = 18 * k, dx = (Width - (Tour.StepCount - 1) * sp - dot) / 2, dy = Height - 26 * k;
+            for (int i = 0; i < Tour.StepCount; i++)
+                using (var b = new SolidBrush(i == step ? Theme.Music : Theme.Line))
+                    g.FillEllipse(b, dx + i * sp, dy, dot, dot);
+        }
+    }
+
+    // Recuadro de «Pruébalo»: cambia cuando el controlador responde.
+    class TourHint : Control
+    {
+        string msg = "";
+        Color accent = Theme.Muted;
+        public TourHint() { SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true); }
+        public void Set(string text, Color c) { msg = text; accent = c; Invalidate(); }
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            var g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.Clear(Theme.Bg);
+            float k = DeviceDpi / 96f;
+            using (var p = Theme.Round(new RectangleF(0, 0, Width - 1, Height - 1), 10 * k))
+            using (var b = new SolidBrush(Theme.Field))
+                g.FillPath(b, p);
+            using (var b = new SolidBrush(accent)) g.FillEllipse(b, 14 * k, Height / 2f - 5 * k, 10 * k, 10 * k);
+            int left = (int)(36 * k), width = Width - left - (int)(14 * k);
+            var flags = TextFormatFlags.WordBreak | TextFormatFlags.Left | TextFormatFlags.NoPrefix;
+            int h = Math.Min(Height, TextRenderer.MeasureText(g, msg, Font, new Size(width, 0), flags).Height);
+            TextRenderer.DrawText(g, msg, Font, new Rectangle(left, (Height - h) / 2, width, h), Theme.Text, flags);
+        }
+    }
+
+    // Cinco pasos cortos que se pueden probar con el controlador en la mano. Se abre la primera vez y con el botón «?».
+    class Tour : Form
+    {
+        public const int StepCount = 5;
+        readonly Func<string> port;       // nombre del controlador conectado (null si no hay)
+        readonly Action<int> enterStep;   // la ventana principal deja listo el modo de cada paso
+        readonly TourArt art;
+        readonly TourHint hint;
+        readonly Label lblStep, lblTitle, lblBody;
+        readonly Button btnBack, btnNext;
+        readonly LinkLabel lnkSkip;
+        readonly Timer poll = new Timer { Interval = 700 };
+        static readonly Font TitleFont = new Font("Segoe UI Semibold", 19f);
+        static readonly Font BodyFont = new Font("Segoe UI", 10.5f);
+        int step;
+        bool answered;   // el recuadro ya está respondiendo a un pad: no se cambia solo
+
+        static readonly string[] Titles = { L.T("Te damos la bienvenida"), L.T("Tres pads para moverte"), L.T("Modo Música: a tocar"), L.T("Modo Oficina: atajos con un toque"), L.T("Hazlo a tu manera") };
+        static readonly string[] Bodies = {
+            L.T("PadBox convierte tu controlador de pads en un instrumento y en un panel de atajos para Windows.\n\nEsta guía dura un minuto y puedes probar cada paso con tu controlador."),
+            L.T("Pad 1: cambia entre Música y Oficina.\nPad 2: va al preset anterior.\nPad 3: va al preset siguiente.\n\nUn preset es un grupo de sonidos o de atajos. Al cambiar, aparece un aviso con su nombre."),
+            L.T("Cada preset es un instrumento distinto.\n\nEl pad 4 enciende o apaga el ritmo, y los demás pads tocan notas, acordes o sonidos."),
+            L.T("Cada pad hace una tarea: copiar, pegar, subir el volumen, cambiar de ventana…\n\nAbre tu programa y toca el pad. Los colores agrupan las funciones parecidas."),
+            L.T("Haz clic en un pad en la pantalla para cambiar lo que hace.\n\nArrastra un mp3 o wav sobre un pad para darle ese sonido.\n\nAl cerrar la ventana, PadBox sigue funcionando junto al reloj.") };
+
+        public Tour(int padCount, Func<string> connectedPort, Action<int> onStep)
+        {
+            port = connectedPort; enterStep = onStep;
+            SuspendLayout();
+            AutoScaleDimensions = new SizeF(96f, 96f);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            Text = L.T("Guía rápida") + " · PadBox";
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false; MinimizeBox = false; ShowInTaskbar = false;
+            StartPosition = FormStartPosition.CenterParent;
+            BackColor = Theme.Bg; ForeColor = Theme.Text; Font = Theme.Base;
+            ClientSize = new Size(780, 480);
+            KeyPreview = true;
+
+            art = new TourArt(padCount) { Left = 0, Top = 0, Width = 300, Height = 480 };
+            lblStep = new Label { Left = 328, Top = 28, Width = 424, Height = 20, ForeColor = Theme.Muted, Font = Theme.Small };
+            lblTitle = new Label { Left = 326, Top = 48, Width = 430, Height = 44, Font = TitleFont, AutoEllipsis = true };
+            lblBody = new Label { Left = 328, Top = 100, Width = 424, Height = 190, Font = BodyFont, ForeColor = Theme.Text };
+            hint = new TourHint { Left = 328, Top = 296, Width = 424, Height = 104 };
+            var bar = new Panel { Left = 300, Top = 416, Width = 480, Height = 64, BackColor = Theme.Bg };
+            lnkSkip = new LinkLabel { Left = 28, Top = 22, AutoSize = true, Text = L.T("Omitir guía"), LinkColor = Theme.Muted, ActiveLinkColor = Theme.Text, VisitedLinkColor = Theme.Muted, LinkBehavior = LinkBehavior.HoverUnderline };
+            lnkSkip.LinkClicked += (s, e) => Close();
+            btnBack = TourButton(L.T("Atrás"), 232, 100, Theme.Field, Theme.Text);
+            btnBack.Click += (s, e) => Go(step - 1);
+            btnNext = TourButton(L.T("Siguiente"), 340, 112, Theme.Music, Color.White);
+            btnNext.Click += (s, e) => { if (step >= StepCount - 1) Close(); else Go(step + 1); };
+            bar.Controls.AddRange(new Control[] { lnkSkip, btnBack, btnNext });
+            Controls.AddRange(new Control[] { art, lblStep, lblTitle, lblBody, hint, bar });
+            AcceptButton = btnNext;
+            poll.Tick += (s, e) => { if (!answered) ShowHint(); };
+            poll.Start();
+            ResumeLayout(false);
+            Go(0);
+        }
+        static Button TourButton(string text, int left, int width, Color back, Color fore)
+        {
+            var b = new Button { Text = text, Left = left, Top = 14, Width = width, Height = 36, FlatStyle = FlatStyle.Flat, BackColor = back, ForeColor = fore, Font = Theme.Bold, Cursor = Cursors.Hand, UseVisualStyleBackColor = false };
+            b.FlatAppearance.BorderColor = back == Theme.Field ? Theme.Line : back;
+            b.FlatAppearance.MouseOverBackColor = Theme.Blend(back, Color.White, .12);
+            return b;
+        }
+        protected override void Dispose(bool disposing) { if (disposing) poll.Dispose(); base.Dispose(disposing); }
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+            if (e.KeyCode == Keys.Escape) Close();
+        }
+        public int Step { get { return step; } }
+        public void Next() { btnNext.PerformClick(); }
+
+        public void Go(int s)
+        {
+            step = Math.Max(0, Math.Min(StepCount - 1, s));
+            answered = false;
+            art.Step = step;
+            lblStep.Text = L.T("Paso ") + (step + 1) + L.T(" de ") + StepCount;
+            lblTitle.Text = Titles[step];
+            lblBody.Text = Bodies[step];
+            btnBack.Visible = step > 0;
+            lnkSkip.Visible = step < StepCount - 1;
+            btnNext.Text = step == StepCount - 1 ? L.T("Empezar") : L.T("Siguiente");
+            ShowHint();
+            enterStep(step);
+            btnNext.Select();
+        }
+        void ShowHint()
+        {
+            string p = port();
+            if (step == 4) { hint.Set(L.T("Esta guía siempre está en el botón «?» de arriba."), Theme.Music); return; }
+            if (p == null)
+            {
+                hint.Set(step == 0 ? L.T("Conecta tu controlador por USB. Si aún no lo tienes a mano, puedes seguir igual.")
+                                   : L.T("Cuando conectes tu controlador podrás probar este paso."), Theme.Warn);
+                return;
+            }
+            string[] tries = {
+                L.T("Conectado a ") + p + L.T(". Toca cualquier pad. Si no responde, al terminar usa «Detectar pads»."),
+                L.T("Pruébalo: toca el pad 1 y mira el aviso que aparece en la pantalla."),
+                L.T("Pruébalo: toca el pad 4 para iniciar el ritmo, y otra vez para detenerlo."),
+                L.T("Pruébalo: toca un pad para ver qué hace. Durante esta guía los atajos no se ejecutan.") };
+            hint.Set(tries[step], step == 0 ? Theme.Ok : Theme.Music);
+        }
+        // La ventana principal avisa cada vez que se toca un pad del controlador
+        public void OnPad(int i, string name, string detail)
+        {
+            art.Flash(i);
+            string msg = null;
+            bool action = i >= PadLayout.FixedPads && !string.IsNullOrEmpty(name);
+            switch (step)
+            {
+                case 0: msg = L.T("¡Funciona! Tocaste el pad ") + (i + 1) + "."; break;
+                case 1:
+                    msg = i == 0 ? L.T("¡Eso es! El pad 1 cambió de modo.") : i == 1 ? L.T("¡Eso es! El pad 2 fue al preset anterior.")
+                        : i == 2 ? L.T("¡Eso es! El pad 3 fue al preset siguiente.") : L.T("Ese pad es de otro paso: prueba con el 1, el 2 o el 3.");
+                    break;
+                case 2: if (i == 3) msg = L.T("¡Eso es! El pad 4 enciende y apaga el ritmo."); else if (action) msg = L.T("Este pad toca: ") + name; break;
+                case 3: if (action) msg = L.T("Este pad hace: ") + name + (string.IsNullOrEmpty(detail) || detail == name ? "" : " (" + detail + ")"); break;
+            }
+            if (msg != null) { answered = true; hint.Set(msg, Theme.Ok); }
         }
     }
 
@@ -2167,7 +2443,9 @@ namespace PadBox
             var bDup = MkButton(L.T("Duplicar"), 80); bDup.Click += (s, e) => NewPreset(true);
             var bRen = MkButton(L.T("Renombrar"), 92); bRen.Click += (s, e) => RenamePreset();
             var bDel = MkButton(L.T("Borrar"), 64); bDel.Click += (s, e) => DeletePreset();
-            flow.Controls.AddRange(new Control[] { title, btnMusic, btnOffice, Inline("Preset:", 18), btnIcon, cboPreset, bNew, bDup, bRen, bDel });
+            var bHelp = MkButton("?", 36); bHelp.Font = Theme.Bold; bHelp.Click += (s, e) => ShowTour();
+            new ToolTip().SetToolTip(bHelp, L.T("Guía rápida"));
+            flow.Controls.AddRange(new Control[] { title, btnMusic, btnOffice, Inline("Preset:", 18), btnIcon, cboPreset, bNew, bDup, bRen, bDel, bHelp });
 
             // editor
             // Con barra vertical si la ventana es baja; el ancho extra deja lugar a la barra para que no aparezca la horizontal
@@ -2380,13 +2658,90 @@ namespace PadBox
             menu.Items.Add(L.T("Abrir"), null, (s, e) => ShowMain());
             menu.Items.Add(L.T("Modo música"), null, (s, e) => SetMode(false));
             menu.Items.Add(L.T("Modo oficina"), null, (s, e) => SetMode(true));
+            menu.Items.Add(L.T("Guía rápida"), null, (s, e) => ShowTour());
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add(L.T("Salir"), null, (s, e) => Quit());
             tray = new NotifyIcon { Icon = Icon, Text = "PadBox", Visible = true, ContextMenuStrip = menu };
             tray.DoubleClick += (s, e) => ShowMain();
         }
         void ShowMain() { Show(); WindowState = FormWindowState.Normal; Activate(); }
-        public void Quit() { exiting = true; Close(); }
+        public void Quit()
+        {
+            exiting = true;
+            if (tour != null) { tour.Close(); BeginInvoke(new Action(Close)); return; }   // primero cierra la guía, que está abierta encima
+            Close();
+        }
+
+        // ---------- guía de bienvenida ----------
+        Tour tour;
+        void ShowTour()
+        {
+            if (tour != null) { tour.Activate(); return; }
+            ShowMain();
+            bool wasOffice = cfg.OfficeMode;
+            tray.ContextMenuStrip.Enabled = false;
+            using (tour = new Tour(PadCount, () => midiIn != null ? cfg.InPort : null, TourStep))
+            {
+                if (TourOpened != null) TourOpened(tour);
+                tour.ShowDialog(this);
+            }
+            tour = null;
+            tray.ContextMenuStrip.Enabled = true;
+            cfg.TourDone = true;
+            SaveConfig();
+            if (exiting) return;
+            StopLoops();
+            ReleaseAll();
+            if (cfg.OfficeMode != wasOffice) SetMode(wasOffice);   // deja todo como estaba antes de la guía
+        }
+        void TourStep(int step)
+        {
+            StopLoops();
+            ReleaseAll();
+            if (step == 2 && cfg.OfficeMode) SetMode(false);
+            else if (step == 3 && !cfg.OfficeMode) SetMode(true);
+        }
+        // Pruebas: ¿la guía se abre sola al iniciar? (PadBox.exe --shot-firstrun archivo.txt)
+        public void RunFirstRunTest(string path)
+        {
+            bool opened = false;
+            TourOpened += t =>
+            {
+                opened = true;
+                var close = new Timer { Interval = 300 };
+                close.Tick += (s, e) => { close.Stop(); t.Close(); };
+                close.Start();
+            };
+            var end = new Timer { Interval = 3000 };
+            end.Tick += (s, e) => { end.Stop(); File.WriteAllText(path, "guia abierta sola=" + opened + " vista=" + cfg.TourDone); Environment.Exit(0); };
+            end.Start();
+        }
+        // Pruebas: recorre la guía sola y anota qué pasó en cada paso (PadBox.exe --shot-tourflow archivo.txt)
+        event Action<Tour> TourOpened;
+        public void RunTourFlowTest(string path)
+        {
+            var log = new StringBuilder();
+            TourOpened += t =>
+            {
+                var tick = new Timer { Interval = 250 };
+                tick.Tick += (s, e) =>
+                {
+                    log.AppendLine("paso=" + (t.Step + 1) + " oficina=" + cfg.OfficeMode);
+                    if (t.Step == 3)
+                    {
+                        PadDown(3, 100);   // en la guía, un atajo no debe ejecutarse
+                        log.AppendLine("atajo presionado durante la guia=" + (heldKeys.Count > 0));
+                        PadUp(3);
+                    }
+                    if (t.Step == Tour.StepCount - 1) tick.Stop();
+                    t.Next();
+                };
+                tick.Start();
+            };
+            ShowTour();
+            log.AppendLine("terminada=" + cfg.TourDone + " oficina=" + cfg.OfficeMode);
+            File.WriteAllText(path, log.ToString());
+        }
 
         // ---------- pantallas ----------
         // Pintado con doble búfer de toda la ventana: evita restos de dibujo al moverla entre pantallas
@@ -2415,6 +2770,7 @@ namespace PadBox
         {
             AdjustBars();   // ya con la escala de pantalla aplicada
             base.OnShown(e);
+            if (!cfg.TourDone && (!Program.TestMode || Program.FirstRunTest)) BeginInvoke(new Action(ShowTour));   // primera vez que se abre PadBox
         }
         protected override void OnMove(EventArgs e)
         {
@@ -2482,7 +2838,7 @@ namespace PadBox
             try { if (File.Exists(cfgPath)) c = new JavaScriptSerializer().Deserialize<Config>(File.ReadAllText(cfgPath, Encoding.UTF8)); }
             catch { try { File.Copy(cfgPath, cfgPath + ".dañado", true); } catch { } }
             // Configuración nueva: los presets por defecto ya están al día (y en el idioma de la app), sin migraciones
-            if (c == null) c = new Config { Version = 14 };
+            if (c == null) c = new Config { Version = 15 };
             if (c.InNotes == null || c.InNotes.Count != 16) c.InNotes = Enumerable.Range(36, 16).ToList();
             if (c.Music == null || c.Music.Count == 0) c.Music = Defaults.Music();
             if (c.Office == null || c.Office.Count == 0) c.Office = Defaults.Office();
@@ -2599,7 +2955,8 @@ namespace PadBox
                 }
                 c.Version = 13;
             }
-            c.Version = 14;
+            if (c.Version < 15) c.TourDone = true;   // quien ya usaba PadBox no necesita la guía de bienvenida (sigue en el botón «?»)
+            c.Version = 15;
             foreach (var p in c.Music.Concat(c.Office))
             {
                 if (p.Name == null) p.Name = "Preset";
@@ -2847,6 +3204,13 @@ namespace PadBox
         void PadDown(int i, int vel)
         {
             pads[i].Hit = true; pads[i].Invalidate();
+            if (tour != null)
+            {
+                var act = i >= PadLayout.FixedPads ? Cur.Pads[i - PadLayout.FixedPads] : null;
+                tour.OnPad(i, act != null ? act.Name : "", act != null ? Describe(act) : "");
+                if (i == 0 && tour.Step >= 2) return;                                // cada paso se queda en su modo
+                if (cfg.OfficeMode && i >= PadLayout.FixedPads) return;              // en la guía los atajos solo se muestran
+            }
             if (i == 0) { SetMode(!cfg.OfficeMode); return; }
             if (i == 1) { SelectPreset(PrevIdx); return; }
             if (i == 2) { SelectPreset(NextIdx); return; }
@@ -3505,7 +3869,8 @@ namespace PadBox
     {
         [DllImport("user32.dll")] static extern bool SetProcessDPIAware();
 
-        public const string Version = "1.1.0";
+        public const string Version = "1.2.0";
+        public static bool FirstRunTest;   // pruebas: deja abrir la guía sola aunque sea una prueba
         public static bool TestMode;   // capturas de prueba: no tocar las luces del pad
 
         // Diagnóstico: PadBox.exe --lights-test archivo.txt (solo lee; reescribe el color del pad 1 con el mismo valor)
@@ -3538,6 +3903,41 @@ namespace PadBox
             }
             pl.Shutdown(false);
             mi.Dispose();
+            return sb.ToString();
+        }
+
+        [DllImport("user32.dll")] static extern IntPtr GetWindow(IntPtr hWnd, uint cmd);
+        [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
+        [DllImport("user32.dll")] static extern bool SetWindowPos(IntPtr hWnd, IntPtr after, int x, int y, int cx, int cy, uint flags);
+
+        // ¿La ventana a está delante de la ventana b?
+        static bool IsAbove(IntPtr a, IntPtr b)
+        {
+            for (var h = GetWindow(b, 3); h != IntPtr.Zero; h = GetWindow(h, 3)) if (h == a) return true;   // 3 = la ventana que tiene delante
+            return false;
+        }
+        static void Pump(int ms)
+        {
+            var end = DateTime.Now.AddMilliseconds(ms);
+            while (DateTime.Now < end) { Application.DoEvents(); System.Threading.Thread.Sleep(15); }
+        }
+        // Diagnóstico: PadBox.exe --osd-test archivo.txt
+        static string OsdSelfTest()
+        {
+            var sb = new StringBuilder();
+            var rival = new Form { TopMost = true, FormBorderStyle = FormBorderStyle.None, ShowInTaskbar = false, StartPosition = FormStartPosition.Manual, Bounds = new Rectangle(0, 0, 40, 40), BackColor = Color.Black };
+            rival.Show();
+            Pump(200);
+            var osd = new Osd();
+            osd.ShowInfo(L.T("MÚSICA"), "Test", "star", Theme.Music, "1 / 1");
+            Pump(150);
+            sb.AppendLine("encima al mostrarse=" + IsAbove(osd.Handle, rival.Handle));
+            SetWindowPos(rival.Handle, new IntPtr(-1), 0, 0, 0, 0, 0x1 | 0x2 | 0x10);   // la otra ventana se adelanta
+            Pump(20);
+            sb.AppendLine("la otra ventana se adelanto=" + IsAbove(rival.Handle, osd.Handle));
+            Pump(500);
+            sb.AppendLine("encima otra vez=" + IsAbove(osd.Handle, rival.Handle));
+            sb.AppendLine("no tomo el foco=" + (GetForegroundWindow() != osd.Handle));
             return sb.ToString();
         }
 
@@ -3624,6 +4024,44 @@ namespace PadBox
                     }
                     sheet.Save(args[osdShot + 1]);
                 }
+                return;
+            }
+
+            int osdTest = Array.IndexOf(args, "--osd-test");   // pruebas: el aviso debe quedar encima de otra ventana «siempre visible»
+            if (osdTest >= 0 && osdTest + 1 < args.Length) { File.WriteAllText(args[osdTest + 1], OsdSelfTest()); return; }
+
+            int tourShot = Array.IndexOf(args, "--shot-tour");   // pruebas: --shot-tour paso archivo.png [pad]
+            if (tourShot >= 0 && tourShot + 2 < args.Length)
+            {
+                var t = new Tour(16, () => "SMC-PAD Pocket", s => { }) { StartPosition = FormStartPosition.CenterScreen };
+                t.Go(int.Parse(args[tourShot + 1]));
+                t.Shown += (s, e) =>
+                {
+                    if (tourShot + 3 < args.Length && !args[tourShot + 3].StartsWith("--")) t.OnPad(int.Parse(args[tourShot + 3]), L.T("Copiar"), "Ctrl + C");
+                    Application.DoEvents();
+                    using (var bmp = new Bitmap(t.Width, t.Height)) { t.DrawToBitmap(bmp, new Rectangle(0, 0, t.Width, t.Height)); bmp.Save(args[tourShot + 2]); }
+                    Environment.Exit(0);
+                };
+                Application.Run(t);
+                return;
+            }
+
+            int firstRun = Array.IndexOf(args, "--shot-firstrun");   // pruebas: la guía se abre sola solo en una instalación nueva
+            if (firstRun >= 0 && firstRun + 1 < args.Length)
+            {
+                FirstRunTest = true;
+                var f = new MainForm(false);
+                f.RunFirstRunTest(args[firstRun + 1]);
+                Application.Run(f);
+                return;
+            }
+
+            int tourFlow = Array.IndexOf(args, "--shot-tourflow");   // pruebas: recorre la guía completa dentro de la ventana principal
+            if (tourFlow >= 0 && tourFlow + 1 < args.Length)
+            {
+                var f = new MainForm(false);
+                f.Shown += (s, e) => { f.RunTourFlowTest(args[tourFlow + 1]); Environment.Exit(0); };
+                Application.Run(f);
                 return;
             }
 

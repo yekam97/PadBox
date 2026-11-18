@@ -61,9 +61,9 @@ Requiere un controlador MIDI USB. PadBox no recoge datos ni necesita internet.
 
 PadBox es una app independiente: no está afiliada a M-VAVE, Akai, Novation, OBS, Adobe ni a otras marcas mencionadas, ni cuenta con su respaldo. Sus nombres se usan solo para indicar compatibilidad y pertenecen a sus dueños.
 
-**Novedades de esta versión (1.1.0):**
+**Novedades de esta versión (1.2.0):**
 
-PadBox ahora también está en inglés: se abre en el idioma de Windows y puedes cambiarlo en «Idioma». Nuevo tráiler.
+Nueva guía de bienvenida paso a paso. El aviso de modo y de preset ahora se ve encima de las demás apps.
 
 **Características del producto (una por línea, hasta 20):**
 
@@ -121,7 +121,7 @@ Requires a USB MIDI controller. PadBox collects no data and needs no internet co
 
 PadBox is an independent app: it is not affiliated with or endorsed by M-VAVE, Akai, Novation, OBS, Adobe or any other brand mentioned. Their names are used only to indicate compatibility and belong to their owners.
 
-**What's new in this version:** PadBox is now available in English: it opens in your Windows language and you can change it under "Language". New trailer.
+**What's new in this version:** New step-by-step welcome guide. The mode and preset notice now appears on top of other apps.
 
 **Product features:**
 

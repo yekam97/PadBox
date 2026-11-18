@@ -19,7 +19,7 @@ La app está en **español e inglés**: se abre en el idioma de Windows y puedes
 
 **Versión portable:**
 
-1. Descarga **PadBox-1.1.0.zip** desde la [página de descarga](https://yekam97.github.io/padbox/).
+1. Descarga **PadBox-1.2.0.zip** desde la [página de descarga](https://yekam97.github.io/padbox/).
 2. Descomprímelo en una carpeta (por ejemplo, en Documentos).
 3. Conecta tu controlador por USB y abre **PadBox.exe**.
 
